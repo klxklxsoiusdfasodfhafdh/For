@@ -4,7 +4,8 @@ if myuptimex > 2:
     print("")
 else:
     os.system('cls')
-    print("Error, please try to run again.")
+    print("Error.")
+    print("Run again in 2 minutes or so.")
     input()
     exit()
 
