@@ -6,7 +6,7 @@ print("///UPDATE: March 25, 2025")
 print("> Mode 1 has been removed to avoid the risk of flag/ban.")
 print("> Starting today, it's best that you play legit with mode 2.")
 print("> Mode 1 will be in maintenance until it's safe.")
-print("> Mode 1 is still playable but you need to use chest/neck offset.")
+#print("> Mode 1 is still playable but you need to use chest/neck offset.")
 input()
 myuptimex = get_uptime_minutes()
 if myuptimex > 2:
