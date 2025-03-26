@@ -33,7 +33,7 @@ else:
 os.system('cls')
 
 os.system('cls')
-file_path_default_kleix = r"C:\Windows\System32\aes_kleix\default_kleix.txt"
+file_path_default_kleix = r"C:\Windows\System32\valklex\default_kleix.txt"
 if os.path.exists(file_path_default_kleix):
     os.remove(file_path_default_kleix)
     print("Success loading config manager...")
