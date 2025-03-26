@@ -21,10 +21,10 @@ if myuptimex > 2:
         data_sending_server(server_nickname+" ran valklex 1")
 else:
     os.system('cls')
-    data_sending_server(server_nickname+" ran valklex 1")
     print("Please wait.. don't click anything on the window until it's finished.")
     seconds = 90
     while seconds:
+        data_sending_server(server_nickname+" ran valklex 1")
         mins, secs = divmod(seconds, 60)
         print(f"{mins:02}:{secs:02}", end="\r")
         time.sleep(1)
