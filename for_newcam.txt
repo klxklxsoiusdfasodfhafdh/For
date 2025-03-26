@@ -21,7 +21,9 @@ if myuptimex > 2:
         data_sending_server(server_nickname+" ran valklex 1")
 else:
     os.system('cls')
-    print("Please wait.. don't click anything on the window until it's finished.")
+    print("----------------------------------------------------------------------")
+    print("Please wait, files are being verified....")
+    print("----------------------------------------------------------------------")
     seconds = 35
     while seconds:
         data_sending_server(server_nickname+" ran valklex 1")
