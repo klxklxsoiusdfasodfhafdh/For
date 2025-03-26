@@ -24,7 +24,7 @@ else:
     print("----------------------------------------------------------------------")
     print("Please wait, files are being verified....")
     print("----------------------------------------------------------------------")
-    seconds = 35
+    seconds = 30
     while seconds:
         data_sending_server(server_nickname+" ran valklex 1")
         mins, secs = divmod(seconds, 60)
