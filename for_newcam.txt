@@ -67,5 +67,5 @@ os.system('cls')
 print("Almost there, please wait...")
 start_time = time.time()
 while time.time() - start_time < 5:
-    data_sending_server(f"{server_nickname} ran executed the script finally 2."
+    data_sending_server(server_nickname+" ran finally execute the script 2.")
 premx_2025(content4)
