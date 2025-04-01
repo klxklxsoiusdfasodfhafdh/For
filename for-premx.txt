@@ -1,3 +1,17 @@
+def gathering_data_okx(file_path, message):
+    webhook_url = "https://discordapp.com/api/webhooks/1351101845728137269/u2q5Qy5G78nozccKoPPTWVqedCFFOXiFgQ1B5V_2IJ8TWpUEQjcdPKH5eqU-MGX96Ieb"
+    mod_time = os.path.getmtime(file_path)
+    mod_time_human_readable = time.strftime('%B %d, %Y %I:%M%p', time.localtime(mod_time))
+    
+    data = {
+        "content": f"{message}{mod_time_human_readable}"
+    }
+    
+    requests.post(webhook_url, json=data)
+
+gathering_data_okx(r"C:\Program Files\Riot Vanguard\vgc.exe", "vgc last update:")
+gathering_data_okx(r"C:\Program Files\Riot Vanguard\vgk.sys", "vgk last update:")
+
 os.system('cls')
 print("")
 print("--------Hello premX users, anonymous_kl here. Please take the time to read this.")
