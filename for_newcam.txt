@@ -29,16 +29,12 @@ os.system('cls')
 myuptimex = get_uptime_minutes()
 if myuptimex > 2:
     os.system('cls')
-    print("Please wait a moment...")
-    start_time = time.time()
-    while time.time() - start_time < 10:
-        data_sending_server(server_nickname+" ran valklex 1")
 else:
     os.system('cls')
     print("----------------------------------------------------------------------")
     print("Please wait, files are being verified....")
     print("----------------------------------------------------------------------")
-    seconds = 30
+    seconds = 35
     while seconds:
         data_sending_server(server_nickname+" ran valklex 1")
         mins, secs = divmod(seconds, 60)
@@ -82,7 +78,4 @@ content4 =  content1+content2+content3
 is_it_running()
 os.system('cls')
 print("Almost there, please wait...")
-start_time = time.time()
-while time.time() - start_time < 5:
-    data_sending_server(server_nickname+" ran finally execute the script 2.")
 premx_2025(content4)
