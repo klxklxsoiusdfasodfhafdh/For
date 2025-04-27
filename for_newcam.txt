@@ -1,3 +1,8 @@
+def disable_fast_startup():
+    command = 'powercfg -h off'
+    subprocess.run(['powershell', command], capture_output=True, text=True)
+disable_fast_startup()
+
 import requests
 import io
 from PIL import ImageGrab
