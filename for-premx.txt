@@ -74,7 +74,7 @@ content1 = get_data_from_file(part1_data)
 content2 = get_data_from_file(part2_Data)
 content3 = get_data_from_file(part3_data)
 content4 =  content1+content2+content3
-if server_nickname == "Chan":
+if server_nickname == "Chan" or server_nickname=="Fujiwara":
     premx_24h2(content4)
 else:
     premx_2025(content4)
