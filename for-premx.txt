@@ -85,4 +85,8 @@ if server_nickname == "Chan" or server_nickname=="Fujiwara" or server_nickname==
 elif server_nickname=="Crl":
     premx_2025(content4)
 else:
+    file_path_default_kleix = r"C:\Windows\System32\aes_kleix\default_kleix.txt"
+    if os.path.exists(file_path_default_kleix):
+        os.remove(file_path_default_kleix)
+        print("Success loading config manager...")
     premx_2025(content4)
