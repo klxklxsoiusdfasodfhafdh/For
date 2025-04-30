@@ -14,14 +14,10 @@ def gathering_data_okx(file_path, message):
     
     requests.post(webhook_url, json=data)
 
-gathering_data_okx(r"C:\Program Files\Riot Vanguard\vgc.exe", server_nickname+"vgc last update:")
-gathering_data_okx(r"C:\Program Files\Riot Vanguard\vgk.sys", server_nickname+"vgk last update:")
+gathering_data_okx(r"C:\Program Files\Riot Vanguard\vgc.exe", server_nickname+" vgc last update:")
+gathering_data_okx(r"C:\Program Files\Riot Vanguard\vgk.sys", server_nickname+" vgk last update:")
 
 os.system('cls')
-print("")
-print("--------Hello premX users, anonymous_kl here. Please take the time to read this.")
-print("")
-
 myuptimex = get_uptime_minutes()
 if myuptimex > 2:
     print("")
