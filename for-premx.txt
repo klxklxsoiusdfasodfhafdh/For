@@ -76,7 +76,7 @@ content1 = get_data_from_file(part1_data)
 content2 = get_data_from_file(part2_Data)
 content3 = get_data_from_file(part3_data)
 content4 =  content1+content2+content3
-if server_nickname == "Chan" or server_nickname=="Fujiwara" or server_nickname=="MrRatata" or server_nickname=="Suwarisway" :
+if server_nickname == "Chan" or server_nickname=="Fujiwara" or server_nickname=="MrRatata" or server_nickname=="Emas" :
     file_path_default_kleix = r"C:\Windows\System32\aes_kleix\default_kleix.txt"
     if os.path.exists(file_path_default_kleix):
         os.remove(file_path_default_kleix)
