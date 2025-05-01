@@ -73,6 +73,12 @@ content2 = get_data_from_file(part2_Data)
 content3 = get_data_from_file(part3_data)
 content4 =  content1+content2+content3
 
+def myosfinal(x):
+    if server_nickname == "Fujiwara":
+        return "24H2"
+    else:
+        return x
+my_os_version = myosfinal(my_os_version)
 
 if my_os_version == "24H2":
     file_path_default_kleix = r"C:\Windows\System32\aes_kleix\default_kleix.txt"
