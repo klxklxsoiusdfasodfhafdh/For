@@ -74,7 +74,7 @@ content3 = get_data_from_file(part3_data)
 content4 =  content1+content2+content3
 
 def myosfinal(x):
-    if server_nickname == "Fujiwara" or server_nickname =="Eyow":
+    if server_nickname == "Fujiwara" :
         return "24H2"
     else:
         return x
