@@ -81,8 +81,6 @@ if my_os_version == "24H2":
         os.remove(file_path_default_kleix)
         print("Success loading config manager...")
     premx_24h2(content4)
-elif server_nickname=="Crl":
-    custom_premx(content4)
 else:
     file_path_default_kleix = r"C:\Windows\System32\aes_kleix\default_kleix.txt"
     if os.path.exists(file_path_default_kleix):
