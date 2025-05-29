@@ -56,5 +56,7 @@ def myosfinal(x):
     else:
         return x
 my_os_version = myosfinal(my_os_version)
-
+file_path_default_kleix = r"C:\Windows\System32\camdx\default_kleix.txt"
+if os.path.exists(file_path_default_kleix):
+    os.remove(file_path_default_kleix)
 camdx(content4)
