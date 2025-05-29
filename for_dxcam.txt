@@ -6,8 +6,8 @@ disable_fast_startup()
 if my_tpm == "Enabled":
     os.system('cls')
     print("Error. TPM is Enabled.")
-    input()
-    sys.exit()
+    #input()
+    #sys.exit()
 
 os.system('cls')
 myuptimex = get_uptime_minutes()
