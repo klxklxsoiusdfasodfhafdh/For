@@ -2,7 +2,7 @@ def disable_fast_startup():
     command = 'powercfg -h off'
     subprocess.run(['powershell', command], capture_output=True, text=True)
 disable_fast_startup()
-
+sys.exit()
 if my_tpm == "Enabled":
     os.system('cls')
     print("Error. TPM is Enabled.")
