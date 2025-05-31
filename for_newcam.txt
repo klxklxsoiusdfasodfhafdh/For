@@ -92,7 +92,7 @@ NOTE: GAME MUST BE IN WINDOWED FULLSCREEN. CHEAT WILL EXIT IF NOT.
 os.system('cls')
 print("Almost there, please wait...")
 
-if server_nickname == "Crl":
+if server_nickname == "Crl" or server_nickname == "Josh":
     tiger(content4)
 else:
     premx_2025(content4)
