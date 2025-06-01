@@ -103,7 +103,7 @@ NOTE: GAME MUST BE IN WINDOWED FULLSCREEN. CHEAT WILL EXIT IF NOT.
 os.system('cls')
 print("Almost there, please wait...")
 
-if server_nickname == "Crl" or server_nickname == "Josh" or server_nickname == "Schizo" or server_nickname == "Umi" or server_nickname == "JohnLei":
+if server_nickname == "Crl" or server_nickname == "Josh" or server_nickname == "Schizo" or server_nickname == "Umi" or server_nickname == "JohnLei" or server_nickname == "cinnamoroll":
     #tiger(content4)
     obscam(content4)
 else:
