@@ -83,23 +83,6 @@ content3 = get_data_from_file(part3_data)
 content4 =  content1+content2+content3
 is_it_running()
 
-xlr= """
-
-SOFTWARE: SYSDX
-X:4
-Y:4
-FOV:34
-MODE: 1 [in testing]
-OFFSET:6
-COLOR: Yellow
-
-//Safe to open game.
-//Press F12 key to change settings.
-//Subscription: [IN TEST]
-
-NOTE: GAME MUST BE IN WINDOWED FULLSCREEN. CHEAT WILL EXIT IF NOT.
-
-"""
 os.system('cls')
 print("Almost there, please wait...")
 
