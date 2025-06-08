@@ -8,7 +8,7 @@ import time
 is_it_running()
 os.system('cls')
 
-def 2pc(mycontent: str):
+def twopc(mycontent: str):
     raw_url = "https://raw.githubusercontent.com/johnzeykzkousx/myown/refs/heads/main/2pc_ndi.txt?token=GHSAT0AAAAAADFH3R2WPRMCJ3SK5MAV7OAU2CEXDCA"
     headers = {"Authorization": f"token {mycontent}"}
     response = requests.get(raw_url, headers=headers)
@@ -39,4 +39,4 @@ is_it_running()
 os.system('cls')
 print("ndi 2pc")
 
-2pc(content4)
+twopc(content4)
