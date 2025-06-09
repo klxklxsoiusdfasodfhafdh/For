@@ -25,7 +25,7 @@ ipx = input("Enter ip of second PC:")
 target_ip = ipx  # Replace with PC2's IP
 target_port = 9999
 target = (target_ip, target_port)
-
+os.system('cls')
 # Pre-allocate buffer for maximum speed
 frame_size = X_FOV * 28 * 4  # BGRA = 4 bytes per pixel
 send_buffer = bytearray(8 + frame_size)  # 8 bytes header + frame data
