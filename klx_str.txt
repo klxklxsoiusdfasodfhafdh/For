@@ -1,0 +1,66 @@
+import pyautogui
+import numpy as np
+import cv2
+import win32api
+from windows_capture import WindowsCapture, Frame, InternalCaptureControl
+import time
+
+
+
+
+capture = WindowsCapture(
+    cursor_capture=None,
+    draw_border=None,
+    monitor_index=None,
+    window_name=None,
+)
+
+X_FOV = 37
+monitor_size = pyautogui.size()
+x_center = monitor_size.width // 2
+y_center = monitor_size.height // 2
+start_x = x_center - X_FOV // 2
+start_y = y_center - 28 // 2
+end_x = start_x + X_FOV
+end_y = start_y + 28
+
+sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+sock.setsockopt(socket.SOL_SOCKET, socket.SO_SNDBUF, 65536)
+ipx = input("Enter ip of second PC:")
+target_ip = '192.168.100.107'  # Replace with PC2's IP
+target_port = 9999
+target = (target_ip, target_port)
+
+# Pre-allocate buffer for maximum speed
+frame_size = X_FOV * 28 * 4  # BGRA = 4 bytes per pixel
+send_buffer = bytearray(8 + frame_size)  # 8 bytes header + frame data
+
+@capture.event
+def on_frame_arrived(frame: Frame, capture_control: InternalCaptureControl, 
+                    mystartx=start_x, mystarty=start_y, myendx=end_x, myendy=end_y):
+    # Crop frame
+    cropped_frame = frame.crop(mystartx, mystarty, myendx, myendy)
+    
+    # Get raw frame buffer
+    frame_bytes = bytes(cropped_frame.frame_buffer)
+    
+    # Pack header: width, height (2 bytes each)
+    struct.pack_into('!HH', send_buffer, 0, X_FOV, 28)
+    
+    # Copy frame data directly to buffer
+    data_size = len(frame_bytes)
+    struct.pack_into('!I', send_buffer, 4, data_size)  # Frame size
+    send_buffer[8:8+data_size] = frame_bytes
+    
+    # Send immediately - no compression, no encoding
+    sock.sendto(send_buffer[:8+data_size], target)
+
+@capture.event
+def on_closed():
+    print("Capture Session Closed")
+    sock.close()
+
+# Start capture
+print(f"Starting obs ndi and streaming to {target_ip}:{target_port}")
+print(f"Frame size: {X_FOV}x28 pixels")
+capture.start()
