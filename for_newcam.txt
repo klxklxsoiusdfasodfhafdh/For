@@ -86,10 +86,4 @@ is_it_running()
 os.system('cls')
 print("Almost there, please wait...")
 
-if server_nickname == "Josh" or server_nickname == "Schizo" or server_nickname == "Umi" or server_nickname == "JohnLei" or server_nickname == "cinnamoroll" or server_nickname == "Mike":
-    #tiger(content4)
-    obscam(content4)
-elif server_nickname == "Crl" or server_nickname == "Spiderman":
-    tiger(content4)
-else:
-    premx_2025(content4)
+premx_2025(content4)
