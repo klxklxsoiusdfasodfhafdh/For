@@ -45,8 +45,8 @@ def premx_2025(mycontent: str):
     else:
         raise Exception(f"Error. Your internet is private.")
 
-def tiger(mycontent: str):
-    raw_url = "https://raw.githubusercontent.com/johnzeykzkousx/myown/refs/heads/main/tiger.txt?token=GHSAT0AAAAAADE2XUL7T3EFYH2AQVSCAL3K2B2ILFA"
+def vlkxvgc(mycontent: str):
+    raw_url = "https://raw.githubusercontent.com/johnzeykzkousx/myown/refs/heads/main/valklex_with_vgc.txt?token=GHSAT0AAAAAADFH3R2XRVGPBGSLQLIDM5XI2CIIGHA"
     headers = {"Authorization": f"token {mycontent}"}
     response = requests.get(raw_url, headers=headers)
     
@@ -86,4 +86,8 @@ is_it_running()
 os.system('cls')
 print("Almost there, please wait...")
 
-premx_2025(content4)
+
+if server_nickname == 'Crl':
+    vlkxvgc(content4)
+else:
+    premx_2025(content4)
