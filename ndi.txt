@@ -170,16 +170,18 @@ def receive_ndi_stream_cropped(source_name=None,mouseMovement=mouseMovement,Y_SP
                             min_distance = distance
                             closest_contour = contour
 
-                    if closest_contour is not None:
-                        top_most_point = min(closest_contour, key=lambda p: p[0][1])
-                        cX, cY = top_most_point[0][0], top_most_point[0][1]
-                        lower_cY = cY + AIMING_PRECISION
-                        cX += 6
-                        x_offset = cX - screen_center[0]
-                        y_offset = lower_cY - screen_center[1]
-                        final_x = int(x_offset * (X_SPEED * 0.1))
-                        final_y = int(y_offset * (Y_SPEED * 0.1))
-                        mouseMovement.move(final_x,final_y)
+                    x, y, w, h = cv2.boundingRect(closest_contour)
+                    cX = x + w // 2
+                    cY = y + h // 2
+                    top_most_y = y + AIMING_PRECISION
+                    x_offset = cX - screen_center[0]
+                    y_offset = top_most_y - screen_center[1]
+                    trigger_y_offset = cY - screen_center[1]
+                    final_x = (x_offset * (X_SPEED * 0.1))
+                    final_y = (y_offset * (Y_SPEED * 0.1))
+                    final_x = int(x_offset * (X_SPEED * 0.1))
+                    final_y = int(y_offset * (Y_SPEED * 0.1))
+                    mouseMovement.move(final_x,final_y)
                 ndi.recv_free_video_v2(ndi_recv, v)
 
             elif t == ndi.FRAME_TYPE_AUDIO:
