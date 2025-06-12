@@ -1,0 +1,200 @@
+import NDIlib as ndi
+import numpy as np
+import cv2
+import time
+import socket
+import os
+import subprocess
+import struct
+import threading
+# Constants for color detection and aiming
+LOWER_COLOR, UPPER_COLOR = [30, 125, 150], [30, 255, 255]
+KERNEL_SIZE = (3, 3)
+DILATING = 3
+AIMING_PRECISION = int(input("Enter offset:"))
+X_SPEED = int(input("Enter X:"))
+Y_SPEED = int(input("Enter Y:"))
+class mainFunction:
+    def __init__(self):
+        self.hardware = None
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.header = (0x12345678, 0)
+        self.mtx = threading.Lock()
+        self.findHardware()
+
+    def deactivate(self):
+        with self.lock:
+            self.sock = None
+        return
+
+    def findHardware(self):
+        while True:
+            try:
+                self.sock.connect(('127.0.0.1', 6666))
+                break
+            except Exception as e:
+                print(f"Error connecting to socket: {e}")
+                exit()
+
+    def move(self, x, y, click="0"):
+        try:
+            memory_data = (int(x), int(y), 0)
+            self.send_packet(self.header + memory_data)
+            if click != "0":
+                self.shoot()
+        except Exception as e:
+            print("error in movement")
+
+    def shoot(self):
+        self.send_packet(self.header + (0, 0, 0x1))
+        time.sleep(0.06)
+        self.send_packet(self.header + (0, 0, 0x2))
+
+    def send_packet(self, packet_data):
+        packet_bytes = struct.pack('IIiii', *packet_data)
+        try:
+            with self.mtx:
+                self.sock.sendall(packet_bytes)
+                response_bytes = self.sock.recv(struct.calcsize('IIiii'))
+            response_packet = struct.unpack('IIiii', response_bytes)
+            return True, response_packet
+        except socket.error as e:
+            print("Restarting script...")
+            python = sys.executable
+            os.execl(python, python, *sys.argv)
+
+
+mouseMovement = mainFunction()
+def find_ndi_sources():
+    if not ndi.initialize():
+        print("Cannot run NDI")
+        return []
+    ndi_find = ndi.find_create_v2()
+    if ndi_find is None:
+        print("Cannot create NDI finder")
+        return []
+    time.sleep(2)
+    sources = ndi.find_get_current_sources(ndi_find)
+    ndi.find_destroy(ndi_find)
+    return sources
+
+def receive_ndi_stream_cropped(source_name=None,mouseMovement=mouseMovement,Y_SPEED=Y_SPEED,X_SPEED=X_SPEED,AIMING_PRECISION=AIMING_PRECISION,DILATING=DILATING,KERNEL_SIZE=KERNEL_SIZE,LOWER_COLOR=LOWER_COLOR,UPPER_COLOR=UPPER_COLOR):
+    X_FOV = int(input("Enter X FOV: "))
+    Y_FOV = int(input("Enter Y FOV: "))
+
+    if not ndi.initialize():
+        print("Cannot run NDI")
+        return
+
+    sources = find_ndi_sources()
+    if not sources:
+        print("No NDI sources found")
+        return
+
+    print("Available NDI sources:")
+    for i, source in enumerate(sources):
+        print(f"  {i}: {source.ndi_name}")
+
+    if source_name:
+        selected_source = None
+        for source in sources:
+            if source_name in source.ndi_name:
+                selected_source = source
+                break
+        if not selected_source:
+            print(f"Source '{source_name}' not found")
+            return
+    else:
+        selected_source = sources[0]
+
+    print(f"Connecting to: {selected_source.ndi_name}")
+
+    recv_create = ndi.RecvCreateV3()
+    recv_create.source_to_connect_to = selected_source
+    recv_create.color_format = ndi.RECV_COLOR_FORMAT_BGRX_BGRA
+
+    ndi_recv = ndi.recv_create_v3(recv_create)
+    if ndi_recv is None:
+        print("Cannot create NDI receiver")
+        return
+
+    try:
+        print("Receiving frames... Press 'q' to quit")
+        print(f"Cropping to {X_FOV}x{Y_FOV} pixels from center")
+        while True:
+            t, v, a, m = ndi.recv_capture_v2(ndi_recv, 0)
+            if t == ndi.FRAME_TYPE_VIDEO:
+                # Convert NDI frame to numpy array
+                frame_array = np.frombuffer(v.data, dtype=np.uint8)
+                frame = frame_array.reshape((v.yres, v.line_stride_in_bytes // 4, 4))
+                
+                # Convert BGRX to BGR for OpenCV
+                frame_bgr = cv2.cvtColor(frame, cv2.COLOR_BGRA2BGR)
+
+                frame_height, frame_width = frame_bgr.shape[:2]
+                x_center = frame_width // 2
+                y_center = frame_height // 2
+                left = x_center - X_FOV // 2
+                top = y_center - Y_FOV // 2
+
+                region = {
+                    'left': left,
+                    'top': top,
+                    'width': X_FOV,
+                    'height': Y_FOV
+                }
+
+                cropped_frame = frame_bgr[region['top']:region['top'] + region['height'],
+                                          region['left']:region['left'] + region['width']]
+            
+                
+                screen_array = cropped_frame.copy()
+
+                hsv = cv2.cvtColor(cropped_frame, cv2.COLOR_BGR2HSV)
+                mask = cv2.inRange(hsv, np.array(LOWER_COLOR), np.array(UPPER_COLOR))
+                kernel = np.ones(KERNEL_SIZE, np.uint8)
+                dilated = cv2.dilate(mask, kernel, iterations=DILATING)
+                thresh = cv2.threshold(dilated, 60, 255, cv2.THRESH_BINARY)[1]
+                contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+
+                if contours:
+                    screen_center = (X_FOV // 2, Y_FOV // 2)
+                    min_distance = float('inf')
+                    closest_contour = None
+
+                    for contour in contours:
+                        x, y, w, h = cv2.boundingRect(contour)
+                        center = (x + w // 2, y + h // 2)
+                        distance = ((center[0] - screen_center[0]) ** 2 + (center[1] - screen_center[1]) ** 2) ** 0.5
+                        if distance < min_distance:
+                            min_distance = distance
+                            closest_contour = contour
+
+                    if closest_contour is not None:
+                        top_most_point = min(closest_contour, key=lambda p: p[0][1])
+                        cX, cY = top_most_point[0][0], top_most_point[0][1]
+                        lower_cY = cY + AIMING_PRECISION
+                        cX += 6
+                        x_offset = cX - screen_center[0]
+                        y_offset = lower_cY - screen_center[1]
+                        final_x = int(x_offset * (X_SPEED * 0.1))
+                        final_y = int(y_offset * (Y_SPEED * 0.1))
+                        mouseMovement.move(final_x,final_y)
+                ndi.recv_free_video_v2(ndi_recv, v)
+
+            elif t == ndi.FRAME_TYPE_AUDIO:
+                ndi.recv_free_audio_v2(ndi_recv, a)
+
+    except KeyboardInterrupt:
+        print("Interrupted by user")
+    finally:
+        cv2.destroyAllWindows()
+        ndi.recv_destroy(ndi_recv)
+        ndi.destroy()
+
+
+sources = find_ndi_sources()
+if sources:
+    receive_ndi_stream_cropped("PC1-Screen")
+else:
+    print("No NDI sources found. Make sure OBS is running with NDI output enabled.")
