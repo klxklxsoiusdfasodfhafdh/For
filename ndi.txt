@@ -81,7 +81,8 @@ def find_ndi_sources():
 def receive_ndi_stream_cropped(source_name=None,mouseMovement=mouseMovement,Y_SPEED=Y_SPEED,X_SPEED=X_SPEED,AIMING_PRECISION=AIMING_PRECISION,DILATING=DILATING,KERNEL_SIZE=KERNEL_SIZE,LOWER_COLOR=LOWER_COLOR,UPPER_COLOR=UPPER_COLOR,find_ndi_sources=find_ndi_sources):
     X_FOV = int(input("Enter X FOV: "))
     Y_FOV = int(input("Enter Y FOV: "))
-
+    x_adjust = int(input("Enter X adjustment (negative = left, positive = right): "))
+    y_height_percent = float(input("Enter Y height percentage (0.0 = top, 1.0 = bottom): "))
     if not ndi.initialize():
         print("Cannot run NDI")
         return
@@ -171,9 +172,9 @@ def receive_ndi_stream_cropped(source_name=None,mouseMovement=mouseMovement,Y_SP
                             closest_contour = contour
 
                     x, y, w, h = cv2.boundingRect(closest_contour)
-                    cX = x + w // 2
+                    cX = (x + w // 2) + x_adjust
                     cY = y + h // 2
-                    top_most_y = y + AIMING_PRECISION
+                    top_most_y = y + int(h * y_height_percent)
                     x_offset = cX - screen_center[0]
                     y_offset = top_most_y - screen_center[1]
                     trigger_y_offset = cY - screen_center[1]
