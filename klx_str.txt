@@ -1,7 +1,9 @@
-import pyautogui
+import socket
+import struct
 import numpy as np
+import cv2
 from windows_capture import WindowsCapture, Frame, InternalCaptureControl
-import time
+import pyautogui
 
 capture = WindowsCapture(
     cursor_capture=None,
@@ -10,51 +12,70 @@ capture = WindowsCapture(
     window_name=None,
 )
 
-X_FOV = 37
+X_FOV = int(input("Enter X FOV:"))
+Y_FOV = int(input("Enter Y FOV:"))
+
 monitor_size = pyautogui.size()
 x_center = monitor_size.width // 2
 y_center = monitor_size.height // 2
 start_x = x_center - X_FOV // 2
 start_y = y_center - 28 // 2
 end_x = start_x + X_FOV
-end_y = start_y + 28
+end_y = start_y + Y_FOV
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 sock.setsockopt(socket.SOL_SOCKET, socket.SO_SNDBUF, 65536)
-ipx = input("Enter ip of second PC:")
-target_ip = ipx  # Replace with PC2's IP
+target_ip = input("Enter IP of second PC:")  # Replace with PC2's IP
 target_port = 9999
 target = (target_ip, target_port)
+
 # Pre-allocate buffer for maximum speed
-frame_size = X_FOV * 28 * 4  # BGRA = 4 bytes per pixel
+frame_size = X_FOV * Y_FOV * 3  # BGR = 3 bytes per pixel
 send_buffer = bytearray(8 + frame_size)  # 8 bytes header + frame data
+
+# Create OpenCV window
+#cv2.namedWindow('Cropped Frame', cv2.WINDOW_AUTOSIZE)
 
 @capture.event
 def on_frame_arrived(frame: Frame, capture_control: InternalCaptureControl, 
-                    mystartx=start_x, mystarty=start_y, myendx=end_x, myendy=end_y,frame_size=frame_size,send_buffer=send_buffer,target=target,target_port=target_port,target_ip=target_ip,sock=sock,X_FOV=X_FOV):
+                    mystartx=start_x, mystarty=start_y, myendx=end_x, myendy=end_y):
     # Crop frame
     cropped_frame = frame.crop(mystartx, mystarty, myendx, myendy)
     
-    # Get raw frame buffer
+    # Get raw frame buffer and convert to BGR
     frame_bytes = bytes(cropped_frame.frame_buffer)
+    frame_array = np.frombuffer(frame_bytes, dtype=np.uint8)
+    frame_array = frame_array.reshape((Y_FOV, X_FOV, 4))  # BGRA format
+    bgr_frame = cv2.cvtColor(frame_array, cv2.COLOR_BGRA2BGR)
+    
+    # Convert BGR frame to bytes for sending
+    bgr_bytes = bgr_frame.tobytes()
     
     # Pack header: width, height (2 bytes each)
-    struct.pack_into('!HH', send_buffer, 0, X_FOV, 28)
+    struct.pack_into('!HH', send_buffer, 0, X_FOV, Y_FOV)
     
-    # Copy frame data directly to buffer
-    data_size = len(frame_bytes)
+    # Copy BGR frame data to buffer
+    data_size = len(bgr_bytes)
     struct.pack_into('!I', send_buffer, 4, data_size)  # Frame size
-    send_buffer[8:8+data_size] = frame_bytes
+    send_buffer[8:8+data_size] = bgr_bytes
     
-    # Send immediately - no compression, no encoding
+    # Send BGR frame - no compression, no encoding
     sock.sendto(send_buffer[:8+data_size], target)
+    
+    # Display the frame
+    #cv2.imshow('Cropped Frame', bgr_frame)
+    
+    # Check for 'q' key press to quit
+    #if cv2.waitKey(1) & 0xFF == ord('q'):
+        #capture_control.stop()
 
 @capture.event
 def on_closed():
     print("Capture Session Closed")
+    cv2.destroyAllWindows()
     sock.close()
 
 # Start capture
-print(f"Starting obs ndi and streaming to {target_ip}:{target_port}")
-print(f"Frame size: {X_FOV}x28 pixels")
+print(f"Starting obs ndi screen capture and streaming to {target_ip}:{target_port}")
+print(f"Frame size: {X_FOV}x{Y_FOV} pixels")
 capture.start()
