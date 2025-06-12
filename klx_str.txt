@@ -38,7 +38,7 @@ send_buffer = bytearray(8 + frame_size)  # 8 bytes header + frame data
 
 @capture.event
 def on_frame_arrived(frame: Frame, capture_control: InternalCaptureControl, 
-                    mystartx=start_x, mystarty=start_y, myendx=end_x, myendy=end_y):
+                    mystartx=start_x, mystarty=start_y, myendx=end_x, myendy=end_y,struct=struct,cv2=cv2,sock=sock,send_buffer=send_buffer,target=target):
     # Crop frame
     cropped_frame = frame.crop(mystartx, mystarty, myendx, myendy)
     
