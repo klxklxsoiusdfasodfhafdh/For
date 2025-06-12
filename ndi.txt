@@ -4,16 +4,18 @@ import cv2
 import time
 import socket
 import os
-import subprocess
 import struct
 import threading
-# Constants for color detection and aiming
+import sys
+
+# Exact same constants as your working MSS code
 LOWER_COLOR, UPPER_COLOR = [30, 125, 150], [30, 255, 255]
 KERNEL_SIZE = (3, 3)
 DILATING = 3
-AIMING_PRECISION = int(input("Enter offset:"))
-X_SPEED = int(input("Enter X:"))
-Y_SPEED = int(input("Enter Y:"))
+AIMING_PRECISION = 7
+X_SPEED = 6
+Y_SPEED = 4
+
 class mainFunction:
     def __init__(self):
         self.hardware = None
@@ -23,7 +25,7 @@ class mainFunction:
         self.findHardware()
 
     def deactivate(self):
-        with self.lock:
+        with self.mtx:
             self.sock = None
         return
 
@@ -63,8 +65,8 @@ class mainFunction:
             python = sys.executable
             os.execl(python, python, *sys.argv)
 
-
 mouseMovement = mainFunction()
+
 def find_ndi_sources():
     if not ndi.initialize():
         print("Cannot run NDI")
@@ -78,11 +80,18 @@ def find_ndi_sources():
     ndi.find_destroy(ndi_find)
     return sources
 
-def receive_ndi_stream_cropped(source_name=None,mouseMovement=mouseMovement,Y_SPEED=Y_SPEED,X_SPEED=X_SPEED,AIMING_PRECISION=AIMING_PRECISION,DILATING=DILATING,KERNEL_SIZE=KERNEL_SIZE,LOWER_COLOR=LOWER_COLOR,UPPER_COLOR=UPPER_COLOR,find_ndi_sources=find_ndi_sources):
+def receive_ndi_stream_cropped(source_name=None,AIMING_PRECISION=AIMING_PRECISION,find_ndi_sources=find_ndi_sources,mouseMovement=mouseMovement,Y_SPEED=Y_SPEED,X_SPEED=X_SPEED,DILATING=DILATING,KERNEL_SIZE=KERNEL_SIZE,LOWER_COLOR=LOWER_COLOR,UPPER_COLOR=UPPER_COLOR):
     X_FOV = int(input("Enter X FOV: "))
     Y_FOV = int(input("Enter Y FOV: "))
     x_adjust = int(input("Enter X adjustment (negative = left, positive = right): "))
-    y_height_percent = float(input("Enter Y height percentage (0.0 = top, 1.0 = bottom): "))
+    y_offset = int(input("Enter Y offset (negative = above detection, positive = below): "))
+    
+    # Use wider HSV range for NDI to compensate for compression
+    print("Using wider HSV range for NDI to compensate for streaming compression")
+    NDI_LOWER = [25, 100, 130]  # Wider than MSS [30, 125, 150]
+    NDI_UPPER = [35, 255, 255]  # Wider than MSS [30, 255, 255]
+    print(f"NDI HSV range: {NDI_LOWER} to {NDI_UPPER}")
+    
     if not ndi.initialize():
         print("Cannot run NDI")
         return
@@ -122,71 +131,109 @@ def receive_ndi_stream_cropped(source_name=None,mouseMovement=mouseMovement,Y_SP
     try:
         print("Receiving frames... Press 'q' to quit")
         print(f"Cropping to {X_FOV}x{Y_FOV} pixels from center")
+        
         while True:
             t, v, a, m = ndi.recv_capture_v2(ndi_recv, 0)
             if t == ndi.FRAME_TYPE_VIDEO:
-                # Convert NDI frame to numpy array
+                # Convert NDI frame to numpy array - same approach as MSS
                 frame_array = np.frombuffer(v.data, dtype=np.uint8)
                 frame = frame_array.reshape((v.yres, v.line_stride_in_bytes // 4, 4))
                 
-                # Convert BGRX to BGR for OpenCV
-                frame_bgr = cv2.cvtColor(frame, cv2.COLOR_BGRA2BGR)
+                # MSS gives us BGRA, NDI gives us BGRX/BGRA - treat them the same
+                screen_array = frame.copy()
 
-                frame_height, frame_width = frame_bgr.shape[:2]
+                frame_height, frame_width = screen_array.shape[:2]
                 x_center = frame_width // 2
                 y_center = frame_height // 2
                 left = x_center - X_FOV // 2
                 top = y_center - Y_FOV // 2
 
-                region = {
-                    'left': left,
-                    'top': top,
-                    'width': X_FOV,
-                    'height': Y_FOV
-                }
-
-                cropped_frame = frame_bgr[region['top']:region['top'] + region['height'],
-                                          region['left']:region['left'] + region['width']]
-            
+                # Crop the frame to match MSS region approach
+                cropped_frame = screen_array[top:top + Y_FOV, left:left + X_FOV]
                 
-                screen_array = cropped_frame.copy()
-
+                # Same color processing as MSS but with wider range for NDI
                 hsv = cv2.cvtColor(cropped_frame, cv2.COLOR_BGR2HSV)
-                mask = cv2.inRange(hsv, np.array(LOWER_COLOR), np.array(UPPER_COLOR))
+                mask = cv2.inRange(hsv, np.array(NDI_LOWER), np.array(NDI_UPPER))
                 kernel = np.ones(KERNEL_SIZE, np.uint8)
+                # Try less dilation to reduce fragmentation
                 dilated = cv2.dilate(mask, kernel, iterations=DILATING)
-                thresh = cv2.threshold(dilated, 60, 255, cv2.THRESH_BINARY)[1]
+                # Try morphological closing to connect broken pieces
+                closed = cv2.morphologyEx(dilated, cv2.MORPH_CLOSE, kernel, iterations=2)
+                thresh = cv2.threshold(closed, 60, 255, cv2.THRESH_BINARY)[1]
                 contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
 
                 if contours:
-                    screen_center = (X_FOV // 2, Y_FOV // 2)
-                    min_distance = float('inf')
-                    closest_contour = None
-
+                    # Filter out small contours caused by compression artifacts
+                    large_contours = []
                     for contour in contours:
-                        x, y, w, h = cv2.boundingRect(contour)
-                        center = (x + w // 2, y + h // 2)
-                        distance = ((center[0] - screen_center[0]) ** 2 + (center[1] - screen_center[1]) ** 2) ** 0.5
-                        if distance < min_distance:
-                            min_distance = distance
-                            closest_contour = contour
+                        area = cv2.contourArea(contour)
+                        if area > 100:  # Only keep contours larger than 100 pixels
+                            large_contours.append(contour)
+                    
+                    if large_contours:
+                        screen_center = (X_FOV // 2, Y_FOV // 2)
+                        min_distance = float('inf')
+                        closest_contour = None
 
-                    x, y, w, h = cv2.boundingRect(closest_contour)
-                    cX = (x + w // 2) + x_adjust
-                    cY = y + h // 2
-                    top_most_y = y + int(h * y_height_percent)
-                    x_offset = cX - screen_center[0]
-                    y_offset = top_most_y - screen_center[1]
-                    trigger_y_offset = cY - screen_center[1]
-                    final_x = (x_offset * (X_SPEED * 0.1))
-                    final_y = (y_offset * (Y_SPEED * 0.1))
-                    final_x = int(x_offset * (X_SPEED * 0.1))
-                    final_y = int(y_offset * (Y_SPEED * 0.1))
-                    mouseMovement.move(final_x,final_y)
+                        for contour in large_contours:
+                            x, y, w, h = cv2.boundingRect(contour)
+                            center = (x + w // 2, y + h // 2)
+                            distance = ((center[0] - screen_center[0]) ** 2 + (center[1] - screen_center[1]) ** 2) ** 0.5
+                            if distance < min_distance:
+                                min_distance = distance
+                                closest_contour = contour
+
+                        if closest_contour is not None:
+                            # Get bounding box
+                            x, y, w, h = cv2.boundingRect(closest_contour)
+                            
+                            # Find the ACTUAL topmost white pixel by scanning from top
+                            topmost_pixel = None
+                            for scan_y in range(0, thresh.shape[0]):
+                                for scan_x in range(x, x + w):
+                                    if scan_y < thresh.shape[0] and scan_x < thresh.shape[1]:
+                                        if thresh[scan_y, scan_x] == 255:
+                                            topmost_pixel = (scan_x, scan_y)
+                                            break
+                                if topmost_pixel:
+                                    break
+                            
+                            if topmost_pixel:
+                                cX, cY = topmost_pixel
+                                
+                                # Draw RED dot at the actual topmost point (for visual confirmation)
+                                #cv2.circle(cropped_frame, (cX, cY), radius=4, color=(0, 0, 255), thickness=-1)
+                                
+                                # Apply MSS logic with your adjustments
+                                lower_cY = cY + AIMING_PRECISION + y_offset
+                                cX = cX + 6 + x_adjust  # Exact same as MSS: cX += 6, plus adjustment
+                                
+                                x_offset = cX - screen_center[0]
+                                y_offset_calc = lower_cY - screen_center[1]
+                                final_x = (x_offset * (X_SPEED * 0.1))
+                                final_y = (y_offset_calc * (Y_SPEED * 0.1))
+
+                                # Move the mouse
+                                mouseMovement.move(final_x, final_y)
+
+                                # Draw GREEN dot where we actually aim (after adjustments)
+                                dot_x = int(cX)
+                                dot_y = int(lower_cY)
+                                #cv2.circle(cropped_frame, (dot_x, dot_y), radius=3, color=(0, 255, 0), thickness=-1)
+
+                # Display the current frame
+                #cv2.imshow("NDI Aimbot View", cropped_frame)
+                
+                # Show mask for debugging (optional - can comment out)
+                #cv2.imshow("Mask", thresh)
+                
                 ndi.recv_free_video_v2(ndi_recv, v)
 
             elif t == ndi.FRAME_TYPE_AUDIO:
                 ndi.recv_free_audio_v2(ndi_recv, a)
+
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                break
 
     except KeyboardInterrupt:
         print("Interrupted by user")
@@ -195,9 +242,10 @@ def receive_ndi_stream_cropped(source_name=None,mouseMovement=mouseMovement,Y_SP
         ndi.recv_destroy(ndi_recv)
         ndi.destroy()
 
-
-sources = find_ndi_sources()
-if sources:
-    receive_ndi_stream_cropped("PC1-Screen")
-else:
-    print("No NDI sources found. Make sure OBS is running with NDI output enabled.")
+if __name__ == "__main__":
+    print("Finding NDI sources...")
+    sources = find_ndi_sources()
+    if sources:
+        receive_ndi_stream_cropped("PC1-Screen")
+    else:
+        print("No NDI sources found. Make sure OBS is running with NDI output enabled.")
