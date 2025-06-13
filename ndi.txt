@@ -88,8 +88,8 @@ def receive_ndi_stream_cropped(source_name=None,AIMING_PRECISION=AIMING_PRECISIO
     
     # Use wider HSV range for NDI to compensate for compression
     print("Using wider HSV range for NDI to compensate for streaming compression")
-    NDI_LOWER = [25, 100, 130]  # Wider than MSS [30, 125, 150]
-    NDI_UPPER = [35, 255, 255]  # Wider than MSS [30, 255, 255]
+    NDI_LOWER = [26, 99, 71]  #[25, 100, 130]  # Wider than MSS [30, 125, 150]
+    NDI_UPPER = [80, 255, 255] #[35, 255, 255]  # Wider than MSS [30, 255, 255]
     print(f"NDI HSV range: {NDI_LOWER} to {NDI_UPPER}")
     
     if not ndi.initialize():
