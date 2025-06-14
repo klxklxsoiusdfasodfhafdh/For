@@ -8,12 +8,14 @@ import struct
 import threading
 import sys
 
-# Exact same constants as your working MSS code
 LOWER_COLOR, UPPER_COLOR = [30, 125, 150], [30, 255, 255]
 KERNEL_SIZE = (3, 3)
 DILATING = 3
-AIMING_PRECISION = 7
-X_SPEED = 6
+print("Head offset, for X set to 8")
+print("Head offset, for Y set to 1")
+aimprecisionX = int(input("Enter offset X:"))
+aimprecisionY = int(input("Enter offset Y:"))
+X_SPEED = int(input("Enter X:"))
 Y_SPEED = 4
 
 class mainFunction:
@@ -80,13 +82,9 @@ def find_ndi_sources():
     ndi.find_destroy(ndi_find)
     return sources
 
-def receive_ndi_stream_cropped(source_name=None,mouseMovement=mouseMovement,find_ndi_sources=find_ndi_sources,Y_SPEED=Y_SPEED,X_SPEED=X_SPEED,AIMING_PRECISION=AIMING_PRECISION,DILATING=DILATING,KERNEL_SIZE=KERNEL_SIZE,LOWER_COLOR=LOWER_COLOR,UPPER_COLOR=UPPER_COLOR):
+def receive_ndi_stream_cropped(source_name=None,mouseMovement=mouseMovement,find_ndi_sources=find_ndi_sources,Y_SPEED=Y_SPEED,X_SPEED=X_SPEED,aimprecisionX=aimprecisionX,DILATING=DILATING,KERNEL_SIZE=KERNEL_SIZE,LOWER_COLOR=LOWER_COLOR,UPPER_COLOR=UPPER_COLOR,aimprecisionY=aimprecisionY):
     X_FOV = int(input("Enter X FOV: "))
     Y_FOV = int(input("Enter Y FOV: "))
-    x_adjust = int(input("Enter X adjustment (negative = left, positive = right): "))
-    y_offset = int(input("Enter Y offset (negative = above detection, positive = below): "))
-    
-    # Use wider HSV range for NDI to compensate for compression
     print("Using wider HSV range for NDI to compensate for streaming compression")
     NDI_LOWER = [25, 100, 130]  # Wider than MSS [30, 125, 150]
     NDI_UPPER = [35, 255, 255]  # Wider than MSS [30, 255, 255]
@@ -264,8 +262,8 @@ def receive_ndi_stream_cropped(source_name=None,mouseMovement=mouseMovement,find
                                 #cv2.circle(cropped_frame, (cX, cY), radius=4, color=(0, 0, 255), thickness=-1)
                                 
                                 # Apply MSS logic with your adjustments
-                                lower_cY = cY + AIMING_PRECISION + y_offset
-                                cX = cX + 6 + x_adjust  # Exact same as MSS: cX += 6, plus adjustment
+                                lower_cY = cY + aimprecisionY
+                                cX = cX + aimprecisionX 
                                 
                                 x_offset = cX - screen_center[0]
                                 y_offset_calc = lower_cY - screen_center[1]
