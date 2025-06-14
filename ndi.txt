@@ -86,8 +86,8 @@ def receive_ndi_stream_cropped(source_name=None,mouseMovement=mouseMovement,find
     X_FOV = int(input("Enter X FOV: "))
     Y_FOV = int(input("Enter Y FOV: "))
     print("Using wider HSV range for NDI to compensate for streaming compression")
-    NDI_LOWER = [29, 83, 143] #[25, 100, 130]  # Wider than MSS [30, 125, 150]
-    NDI_UPPER = [73, 255, 255] #[35, 255, 255]  # Wider than MSS [30, 255, 255]
+    NDI_LOWER = [23, 90, 128] #[25, 100, 130]  # Wider than MSS [30, 125, 150]
+    NDI_UPPER = [35, 255, 255] #[35, 255, 255]  # Wider than MSS [30, 255, 255]
     print(f"NDI HSV range: {NDI_LOWER} to {NDI_UPPER}")
     
     if not ndi.initialize():
@@ -189,7 +189,7 @@ def receive_ndi_stream_cropped(source_name=None,mouseMovement=mouseMovement,find
                     # Convert NDI frame to numpy array - same approach as MSS
                     frame_array = np.frombuffer(v.data, dtype=np.uint8)
                     frame = frame_array.reshape((v.yres, v.line_stride_in_bytes // 4, 4))
-                    
+                    frame = frame[:, :, :3]
                     # MSS gives us BGRA, NDI gives us BGRX/BGRA - treat them the same
                     screen_array = frame.copy()
 
@@ -322,7 +322,7 @@ def receive_ndi_stream_cropped(source_name=None,mouseMovement=mouseMovement,find
                                     # Medium range (20-50 pixels): 50% speed  
                                     # Long range (> 50 pixels): 100% speed
                                     if distance_to_target < 16:
-                                        speed_multiplier = 0.5
+                                        speed_multiplier = 1.0
                                     else:
                                         speed_multiplier = 1.0
                                     
