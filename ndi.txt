@@ -130,7 +130,7 @@ def receive_ndi_stream_cropped(source_name=None,mouseMovement=mouseMovement,find
     locked_target = None
     locked_target_id = None
     target_lost_frames = 0
-    MAX_LOST_FRAMES = 10  # How many frames to wait before considering target lost
+    MAX_LOST_FRAMES = 9999  # How many frames to wait before considering target lost
     
     # Frame retry variables
     no_frame_count = 0
