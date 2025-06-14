@@ -189,7 +189,7 @@ def receive_ndi_stream_cropped(source_name=None,mouseMovement=mouseMovement,find
                     # Convert NDI frame to numpy array - same approach as MSS
                     frame_array = np.frombuffer(v.data, dtype=np.uint8)
                     frame = frame_array.reshape((v.yres, v.line_stride_in_bytes // 4, 4))
-                    frame = frame[:, :, :3]
+                    frame[:, :, 3] = 255
                     # MSS gives us BGRA, NDI gives us BGRX/BGRA - treat them the same
                     screen_array = frame.copy()
 
