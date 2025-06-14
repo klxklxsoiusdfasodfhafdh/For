@@ -145,222 +145,165 @@ def receive_ndi_stream_cropped(source_name=None,mouseMovement=mouseMovement,find
         
         while True:
             # Try to capture frame with timeout
-            t, v, a, m = ndi.recv_capture_v2(ndi_recv, 0)  # 100ms timeout instead of 0
-            
-            if t == ndi.FRAME_TYPE_NONE:
-                no_frame_count += 1
-                current_time = time.time()
+            t, v, a, m = ndi.recv_capture_v2(ndi_recv, 0)  # 100ms timeout instead of 0    
+            if t == ndi.FRAME_TYPE_VIDEO:
+                # Convert NDI frame to numpy array - same approach as MSS
+                frame_array = np.frombuffer(v.data, dtype=np.uint8)
+                frame = frame_array.reshape((v.yres, v.line_stride_in_bytes // 4, 4))
+                frame[:, :, 3] = 255
+                # MSS gives us BGRA, NDI gives us BGRX/BGRA - treat them the same
+                screen_array = frame.copy()
+    
+                frame_height, frame_width = screen_array.shape[:2]
+                x_center = frame_width // 2
+                y_center = frame_height // 2
+                left = x_center - X_FOV // 2
+                top = y_center - Y_FOV // 2
+    
+                # Crop the frame to match MSS region approach
+                cropped_frame = screen_array[top:top + Y_FOV, left:left + X_FOV]
                 
-                # Check if we've been without frames for too long
-                if current_time - last_frame_time > FRAME_TIMEOUT:
-                    print(f"No frames received for {FRAME_TIMEOUT} seconds. Attempting to reconnect...")
+                # Same color processing as MSS but with wider range for NDI
+                hsv = cv2.cvtColor(cropped_frame, cv2.COLOR_BGR2HSV)
+                mask = cv2.inRange(hsv, np.array(NDI_LOWER), np.array(NDI_UPPER))
+                kernel = np.ones(KERNEL_SIZE, np.uint8)
+                # Try less dilation to reduce fragmentation
+                dilated = cv2.dilate(mask, kernel, iterations=DILATING)
+                # Try morphological closing to connect broken pieces
+                closed = cv2.morphologyEx(dilated, cv2.MORPH_CLOSE, kernel, iterations=2)
+                thresh = cv2.threshold(closed, 60, 255, cv2.THRESH_BINARY)[1]
+                contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+    
+                if contours:
+                    # Filter out small contours caused by compression artifacts
+                    large_contours = []
+                    for contour in contours:
+                        area = cv2.contourArea(contour)
+                        if area > 100:  # Only keep contours larger than 100 pixels
+                            large_contours.append(contour)
                     
-                    # Destroy current receiver
-                    ndi.recv_destroy(ndi_recv)
-                    
-                    # Wait a bit
-                    time.sleep(1)
-                    
-                    # Try to recreate receiver
-                    ndi_recv = ndi.recv_create_v3(recv_create)
-                    if ndi_recv is None:
-                        print("Failed to recreate NDI receiver. Exiting...")
-                        break
-                    
-                    print("Reconnected to NDI source")
-                    no_frame_count = 0
-                    last_frame_time = current_time
-                    continue
-                
-                # Print status every 50 failed attempts
-                if no_frame_count % 50 == 0:
-                    print(f"Waiting for frames... ({no_frame_count} attempts)")
-                
-                # Small delay to prevent busy waiting
-                time.sleep(0.001)
-                continue
-            
-            elif t == ndi.FRAME_TYPE_VIDEO:
-                # Reset frame counters - we got a frame!
-                no_frame_count = 0
-                last_frame_time = time.time()
-                
-                try:
-                    # Convert NDI frame to numpy array - same approach as MSS
-                    frame_array = np.frombuffer(v.data, dtype=np.uint8)
-                    frame = frame_array.reshape((v.yres, v.line_stride_in_bytes // 4, 4))
-                    frame[:, :, 3] = 255
-                    # MSS gives us BGRA, NDI gives us BGRX/BGRA - treat them the same
-                    screen_array = frame.copy()
-
-                    frame_height, frame_width = screen_array.shape[:2]
-                    x_center = frame_width // 2
-                    y_center = frame_height // 2
-                    left = x_center - X_FOV // 2
-                    top = y_center - Y_FOV // 2
-
-                    # Crop the frame to match MSS region approach
-                    cropped_frame = screen_array[top:top + Y_FOV, left:left + X_FOV]
-                    
-                    # Same color processing as MSS but with wider range for NDI
-                    hsv = cv2.cvtColor(cropped_frame, cv2.COLOR_BGR2HSV)
-                    mask = cv2.inRange(hsv, np.array(NDI_LOWER), np.array(NDI_UPPER))
-                    kernel = np.ones(KERNEL_SIZE, np.uint8)
-                    # Try less dilation to reduce fragmentation
-                    dilated = cv2.dilate(mask, kernel, iterations=DILATING)
-                    # Try morphological closing to connect broken pieces
-                    closed = cv2.morphologyEx(dilated, cv2.MORPH_CLOSE, kernel, iterations=2)
-                    thresh = cv2.threshold(closed, 60, 255, cv2.THRESH_BINARY)[1]
-                    contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
-
-                    if contours:
-                        # Filter out small contours caused by compression artifacts
-                        large_contours = []
-                        for contour in contours:
-                            area = cv2.contourArea(contour)
-                            if area > 100:  # Only keep contours larger than 100 pixels
-                                large_contours.append(contour)
+                    if large_contours:
+                        screen_center = (X_FOV // 2, Y_FOV // 2)
                         
-                        if large_contours:
-                            screen_center = (X_FOV // 2, Y_FOV // 2)
+                        # Check if we have a locked target
+                        if locked_target is not None:
+                            # Try to find our locked target in current contours
+                            target_found = False
+                            best_match = None
+                            min_center_diff = float('inf')
                             
-                            # Check if we have a locked target
-                            if locked_target is not None:
-                                # Try to find our locked target in current contours
-                                target_found = False
-                                best_match = None
-                                min_center_diff = float('inf')
-                                
-                                # Get the center of our locked target for comparison
-                                locked_x, locked_y, locked_w, locked_h = cv2.boundingRect(locked_target)
-                                locked_center = (locked_x + locked_w // 2, locked_y + locked_h // 2)
-                                
-                                for contour in large_contours:
-                                    x, y, w, h = cv2.boundingRect(contour)
-                                    center = (x + w // 2, y + h // 2)
-                                    
-                                    # Calculate distance between centers
-                                    center_diff = ((center[0] - locked_center[0]) ** 2 + 
-                                                 (center[1] - locked_center[1]) ** 2) ** 0.5
-                                    
-                                    # If this contour is close to where our locked target was
-                                    if center_diff < 50:  # Threshold for considering it the same target
-                                        if center_diff < min_center_diff:
-                                            min_center_diff = center_diff
-                                            best_match = contour
-                                            target_found = True
-                                
-                                if target_found:
-                                    # Update locked target with new contour
-                                    locked_target = best_match
-                                    closest_contour = best_match
-                                    target_lost_frames = 0
-                                else:
-                                    # Target might be temporarily occluded
-                                    target_lost_frames += 1
-                                    if target_lost_frames > MAX_LOST_FRAMES:
-                                        # Target is lost, unlock
-                                        locked_target = None
-                                        locked_target_id = None
-                                        print("Target lost, searching for new target...")
-                                    else:
-                                        # Keep using last known position
-                                        closest_contour = locked_target
+                            # Get the center of our locked target for comparison
+                            locked_x, locked_y, locked_w, locked_h = cv2.boundingRect(locked_target)
+                            locked_center = (locked_x + locked_w // 2, locked_y + locked_h // 2)
                             
-                            # If no locked target, find the closest one
-                            if locked_target is None:
-                                min_distance = float('inf')
-                                closest_contour = None
-
-                                for contour in large_contours:
-                                    x, y, w, h = cv2.boundingRect(contour)
-                                    center = (x + w // 2, y + h // 2)
-                                    distance = ((center[0] - screen_center[0]) ** 2 + 
-                                              (center[1] - screen_center[1]) ** 2) ** 0.5
-                                    if distance < min_distance:
-                                        min_distance = distance
-                                        closest_contour = contour
+                            for contour in large_contours:
+                                x, y, w, h = cv2.boundingRect(contour)
+                                center = (x + w // 2, y + h // 2)
                                 
-                                if closest_contour is not None:
-                                    locked_target = closest_contour
-                                    locked_target_id = id(closest_contour)
-                                    print("New target locked!")
+                                # Calculate distance between centers
+                                center_diff = ((center[0] - locked_center[0]) ** 2 + 
+                                             (center[1] - locked_center[1]) ** 2) ** 0.5
+                                
+                                # If this contour is close to where our locked target was
+                                if center_diff < 50:  # Threshold for considering it the same target
+                                    if center_diff < min_center_diff:
+                                        min_center_diff = center_diff
+                                        best_match = contour
+                                        target_found = True
                             
-                            if closest_contour is not None:
-                                # Get bounding box
-                                x, y, w, h = cv2.boundingRect(closest_contour)
-                                
-                                # Find the ACTUAL topmost white pixel by scanning from top
-                                topmost_pixel = None
-                                for scan_y in range(0, thresh.shape[0]):
-                                    for scan_x in range(x, x + w):
-                                        if scan_y < thresh.shape[0] and scan_x < thresh.shape[1]:
-                                            if thresh[scan_y, scan_x] == 255:
-                                                topmost_pixel = (scan_x, scan_y)
-                                                break
-                                    if topmost_pixel:
-                                        break
-                                
-                                if topmost_pixel:
-                                    cX, cY = topmost_pixel
-                                    
-                                    # Draw RED dot at the actual topmost point (for visual confirmation)
-                                    #cv2.circle(cropped_frame, (cX, cY), radius=4, color=(0, 0, 255), thickness=-1)
-                                    
-                                    # Apply MSS logic with your adjustments
-                                    lower_cY = cY + aimprecisionY
-                                    cX = cX + aimprecisionX 
-                                    
-                                    x_offset = cX - screen_center[0]
-                                    y_offset_calc = lower_cY - screen_center[1]
-                                    
-                                    # Calculate distance from crosshair to target
-                                    distance_to_target = ((x_offset ** 2) + (y_offset_calc ** 2)) ** 0.5
-                                    
-                                    # Adaptive speed based on distance
-                                    # Close range (< 20 pixels): 20% speed
-                                    # Medium range (20-50 pixels): 50% speed  
-                                    # Long range (> 50 pixels): 100% speed
-                                    if distance_to_target < 16:
-                                        speed_multiplier = 1.0
-                                    else:
-                                        speed_multiplier = 1.0
-                                    
-                                    # Apply adaptive speed
-                                    adaptive_x_speed = X_SPEED * speed_multiplier
-                                    adaptive_y_speed = Y_SPEED * speed_multiplier
-                                    
-                                    final_x = (x_offset * (adaptive_x_speed * 0.1))
-                                    final_y = (y_offset_calc * (adaptive_y_speed * 0.1))
-
-                                    # Draw BLUE outline on locked target
-                                    #cv2.drawContours(cropped_frame, [closest_contour], -1, (255, 0, 0), 2)
-                                    
-                                    # Move the mouse
-                                    mouseMovement.move(final_x, final_y)
-
-                                    # Draw GREEN dot where we actually aim (after adjustments)
-                                    dot_x = int(cX)
-                                    dot_y = int(lower_cY)
-                                    #cv2.circle(cropped_frame, (dot_x, dot_y), radius=3, color=(0, 255, 0), thickness=-1)
-                        else:
-                            # No large contours but maybe small ones
-                            if locked_target is not None:
+                            if target_found:
+                                # Update locked target with new contour
+                                locked_target = best_match
+                                closest_contour = best_match
+                                target_lost_frames = 0
+                            else:
+                                # Target might be temporarily occluded
                                 target_lost_frames += 1
                                 if target_lost_frames > MAX_LOST_FRAMES:
+                                    # Target is lost, unlock
                                     locked_target = None
                                     locked_target_id = None
-                                    print("All targets lost")
-                    else:
-                        # No contours at all
-                        if locked_target is not None:
-                            target_lost_frames += 1
-                            if target_lost_frames > MAX_LOST_FRAMES:
-                                locked_target = None
-                                locked_target_id = None
-                                print("All targets lost")
-
-                    # Display the current frame
+                                    print("Target lost, searching for new target...")
+                                else:
+                                    # Keep using last known position
+                                    closest_contour = locked_target
+                        
+                        # If no locked target, find the closest one
+                        if locked_target is None:
+                            min_distance = float('inf')
+                            closest_contour = None
+    
+                            for contour in large_contours:
+                                x, y, w, h = cv2.boundingRect(contour)
+                                center = (x + w // 2, y + h // 2)
+                                distance = ((center[0] - screen_center[0]) ** 2 + 
+                                          (center[1] - screen_center[1]) ** 2) ** 0.5
+                                if distance < min_distance:
+                                    min_distance = distance
+                                    closest_contour = contour
+                            
+                            if closest_contour is not None:
+                                locked_target = closest_contour
+                                locked_target_id = id(closest_contour)
+                                print("New target locked!")
+                        
+                        if closest_contour is not None:
+                            # Get bounding box
+                            x, y, w, h = cv2.boundingRect(closest_contour)
+                            
+                            # Find the ACTUAL topmost white pixel by scanning from top
+                            topmost_pixel = None
+                            for scan_y in range(0, thresh.shape[0]):
+                                for scan_x in range(x, x + w):
+                                    if scan_y < thresh.shape[0] and scan_x < thresh.shape[1]:
+                                        if thresh[scan_y, scan_x] == 255:
+                                            topmost_pixel = (scan_x, scan_y)
+                                            break
+                                if topmost_pixel:
+                                    break
+                            
+                            if topmost_pixel:
+                                cX, cY = topmost_pixel
+                                
+                                # Draw RED dot at the actual topmost point (for visual confirmation)
+                                #cv2.circle(cropped_frame, (cX, cY), radius=4, color=(0, 0, 255), thickness=-1)
+                                
+                                # Apply MSS logic with your adjustments
+                                lower_cY = cY + aimprecisionY
+                                cX = cX + aimprecisionX 
+                                
+                                x_offset = cX - screen_center[0]
+                                y_offset_calc = lower_cY - screen_center[1]
+                                
+                                # Calculate distance from crosshair to target
+                                distance_to_target = ((x_offset ** 2) + (y_offset_calc ** 2)) ** 0.5
+                                
+                                # Adaptive speed based on distance
+                                # Close range (< 20 pixels): 20% speed
+                                # Medium range (20-50 pixels): 50% speed  
+                                # Long range (> 50 pixels): 100% speed
+                                if distance_to_target < 16:
+                                    speed_multiplier = 1.0
+                                else:
+                                    speed_multiplier = 1.0
+                                
+                                # Apply adaptive speed
+                                adaptive_x_speed = X_SPEED * speed_multiplier
+                                adaptive_y_speed = Y_SPEED * speed_multiplier
+                                
+                                final_x = (x_offset * (adaptive_x_speed * 0.1))
+                                final_y = (y_offset_calc * (adaptive_y_speed * 0.1))
+    
+                                # Draw BLUE outline on locked target
+                                #cv2.drawContours(cropped_frame, [closest_contour], -1, (255, 0, 0), 2)
+                                
+                                # Move the mouse
+                                mouseMovement.move(final_x, final_y)
+    
+                                # Draw GREEN dot where we actually aim (after adjustments)
+                                dot_x = int(cX)
+                                dot_y = int(lower_cY)
+                                #cv2.circle(cropped_frame, (dot_x, dot_y), radius=3, color=(0, 255, 0), thickness=-1)
                     #cv2.imshow("NDI Aimbot View", cropped_frame)
                     
                     # Show mask for debugging (optional - can comment out)
