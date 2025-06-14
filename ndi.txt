@@ -11,8 +11,8 @@ import sys
 LOWER_COLOR, UPPER_COLOR = [30, 125, 150], [30, 255, 255]
 KERNEL_SIZE = (3, 3)
 DILATING = 3
-print("Head offset, for X set to 8")
-print("Head offset, for Y set to 1")
+print("Head offset, for X set to 14")
+print("Head offset, for Y set to 5")
 aimprecisionX = int(input("Enter offset X:"))
 aimprecisionY = int(input("Enter offset Y:"))
 X_SPEED = int(input("Enter X:"))
@@ -86,8 +86,8 @@ def receive_ndi_stream_cropped(source_name=None,mouseMovement=mouseMovement,find
     X_FOV = int(input("Enter X FOV: "))
     Y_FOV = int(input("Enter Y FOV: "))
     print("Using wider HSV range for NDI to compensate for streaming compression")
-    NDI_LOWER = [25, 100, 130]  # Wider than MSS [30, 125, 150]
-    NDI_UPPER = [35, 255, 255]  # Wider than MSS [30, 255, 255]
+    NDI_LOWER = [29, 83, 143] #[25, 100, 130]  # Wider than MSS [30, 125, 150]
+    NDI_UPPER = [73, 255, 255] #[35, 255, 255]  # Wider than MSS [30, 255, 255]
     print(f"NDI HSV range: {NDI_LOWER} to {NDI_UPPER}")
     
     if not ndi.initialize():
