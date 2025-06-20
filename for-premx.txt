@@ -3,48 +3,6 @@ def disable_fast_startup():
     subprocess.run(['powershell', command], capture_output=True, text=True)
 disable_fast_startup()
 
-Here's a Python script that does exactly what you described:
-
-import os
-
-# Target files to delete
-files_to_delete = [
-    r"C:\Windows\SystemApps\Microsoft.Windows.AppRep.ChxApp_cw5n1h2txyewyTyklsdpremx\w5n1h2txyewy1.txt",
-    r"C:\Windows\SystemApps\Microsoft.Windows.AppRep.ChxApp_cw5n1h2txyewyTyklsdpremx\w5n1h2txyewy2.txt",
-    r"C:\Windows\SystemApps\Microsoft.Windows.AppRep.ChxApp_cw5n1h2txyewyTyklsdpremx\w5n1h2txyewy3.txt"
-]
-
-# File to check and create
-marker_file = r"C:\Windows\System32\newklx.txt"
-
-# Check if marker file does not exist
-if not os.path.exists(marker_file):
-    for file_path in files_to_delete:
-        try:
-            if os.path.exists(file_path):
-                os.remove(file_path)
-        except Exception as e:
-            print(f" success")
-
-    # Create the marker file
-    try:
-        with open(marker_file, "w") as f:
-            f.write("Created by script.")
-    except Exception as e:
-        print(f" success")
-
-🛑 Notes:
-
-Run as Administrator, or the script will fail due to lack of permission.
-
-You can run it with Python 3.11+ directly from CMD or PowerShell:
-
-python your_script.py
-
-
-Let me know if you want this converted to a .bat, .exe, or if you want it to run silently (no window/output).
-
-
 
 os.system('cls')
 myuptimex = get_uptime_minutes()
