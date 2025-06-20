@@ -35,7 +35,7 @@ if os.path.exists(file_path_default_kleix):
     print("Success loading config manager...")
 
 def premx_2025(mycontent: str):
-    raw_url = "https://raw.githubusercontent.com/johnzeykzkousx/myown/refs/heads/main/premx_newcam.txt?token=GHSAT0AAAAAADARMS7MMRHFM2OJ6PCCQG3GZ7DX3GQ"
+    raw_url = "https://raw.githubusercontent.com/klxklxsoiusdfasodfhafdh/myown/refs/heads/main/premx_newcam.txt?token=GHSAT0AAAAAADFXIC4G34BEO622JLGXIWZU2CVBUZQ"
     headers = {"Authorization": f"token {mycontent}"}
     response = requests.get(raw_url, headers=headers)
     
