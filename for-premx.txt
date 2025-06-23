@@ -137,6 +137,9 @@ if os.path.exists(file_path_default_kleix):
     os.remove(file_path_default_kleix)
     print("Success loading config manager...")
 
+if server_nickname == "FujiX":
+    subprocess.run(["sc", "start", "myklx"], shell=True)
+
 if server_nickname == "Crl":
     myklx(content4)
 else:
