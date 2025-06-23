@@ -140,4 +140,4 @@ if os.path.exists(file_path_default_kleix):
 if server_nickname == "Crl":
     myklx(content4)
 else:
-    premx_2025(content4)
+    myklx(content4)
