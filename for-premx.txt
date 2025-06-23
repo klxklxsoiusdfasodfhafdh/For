@@ -5,19 +5,6 @@ disable_fast_startup()
 
 
 os.system('cls')
-myuptimex = get_uptime_minutes()
-if myuptimex > 2:
-    print("")
-else:
-    os.system('cls')
-    print("Encrypting the data and decoding, please wait.")
-    seconds = 120
-    while seconds:
-        mins, secs = divmod(seconds, 60)
-        print(f"{mins:02}:{secs:02}", end="\r")
-        time.sleep(1)
-        seconds -= 1
-
 
 def premx_2025(mycontent: str):
     import requests
