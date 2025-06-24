@@ -7,7 +7,9 @@ from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad
 from windows_capture import WindowsCapture, Frame, InternalCaptureControl
 
+os.system('cls')
 target_ip = input("Enter ip of second PC:")
+print("")
 target_port = 9999
 shared_key = b'klxklxaesosfwaaa'
 cipher = AES.new(shared_key, AES.MODE_ECB)
@@ -54,8 +56,15 @@ def on_frame_arrived(
     aes_cipher=cipher,
     udp_socket=sock,
     target_ip=target_ip,
-    target_port=target_port
+    target_port=target_port,
+    seconds_left=seconds_left
 ):
+    if seconds_left < = 0:
+        os.system('cls')
+        print("---------------------------")
+        print("Key expired.")
+        input()
+        sys.exit()
     cropped = frame.crop(mystartx, mystarty, myendx, myendy)
     img = np.array(cropped.frame_buffer, dtype=np.uint8)
     img = cv2.cvtColor(img, cv2.COLOR_BGRA2BGR)
@@ -86,6 +95,7 @@ def on_frame_arrived(
 def on_closed():
     sock.close()
 
+print("")
 print(f"Started streaming to FOV: {X_FOV} {target_ip}:{target_port}")
 capture.start()
 
