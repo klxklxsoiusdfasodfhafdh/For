@@ -9,7 +9,7 @@ from windows_capture import WindowsCapture, Frame, InternalCaptureControl
 
 target_ip = "192.168.100.108"
 target_port = 9999
-shared_key = b'klxklxaesosfwatree'
+shared_key = b'klxklxaesosfwaaa'
 cipher = AES.new(shared_key, AES.MODE_ECB)
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
