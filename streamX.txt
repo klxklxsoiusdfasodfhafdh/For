@@ -2,18 +2,21 @@ import socket
 import struct
 import numpy as np
 import cv2
-from windows_capture import WindowsCapture, Frame, InternalCaptureControl
 import pyautogui
+from Crypto.Cipher import AES
+from Crypto.Util.Padding import pad
+from windows_capture import WindowsCapture, Frame, InternalCaptureControl
 
-capture = WindowsCapture(
-    cursor_capture=None,
-    draw_border=None,
-    monitor_index=None,
-    window_name=None,
-)
+target_ip = "192.168.100.108"
+target_port = 9999
+shared_key = b'klxklxaesosfwatree'
+cipher = AES.new(shared_key, AES.MODE_ECB)
 
-X_FOV = int(input("Enter X FOV:"))
-Y_FOV = 28
+sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
+# -- FOV Input --
+X_FOV = int(input("Enter X FOV: "))
+Y_FOV = 28  
 
 monitor_size = pyautogui.size()
 x_center = monitor_size.width // 2
@@ -23,16 +26,17 @@ start_y = y_center - Y_FOV // 2
 end_x = start_x + X_FOV
 end_y = start_y + Y_FOV
 
-sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-sock.setsockopt(socket.SOL_SOCKET, socket.SO_SNDBUF, 65536)
-target_ip = '192.168.100.108'  
-target_port = 9999
-target = (target_ip, target_port)
 
+lwcolor = [30, 125, 150]
+uprclr = [30, 255, 255]
 
-frame_size = X_FOV * Y_FOV * 3  
-send_buffer = bytearray(8 + frame_size) 
-
+# -- Capture Init --
+capture = WindowsCapture(
+    cursor_capture=None,
+    draw_border=None,
+    monitor_index=None,
+    window_name=None,
+)
 
 @capture.event
 def on_frame_arrived(
@@ -42,34 +46,48 @@ def on_frame_arrived(
     mystarty=start_y,
     myendx=end_x,
     myendy=end_y,
-    mysock=sock,
-    mytarget=target,
-    mysend_buffer=send_buffer,
+    screen_center=(X_FOV // 2, Y_FOV // 2),
+    lwcolor=lwcolor,
+    uprclr=uprclr,
     np=np,
-    X_FOV=X_FOV,
-    Y_FOV=Y_FOV
+    cv2=cv2,
+    struct=struct,
+    pad=pad,
+    aes_cipher=cipher,
+    udp_socket=sock,
+    target_ip=target_ip,
+    target_port=target_port
 ):
-    cropped_frame = frame.crop(mystartx, mystarty, myendx, myendy)
-    frame_bytes = bytes(cropped_frame.frame_buffer)
-    frame_array = np.frombuffer(frame_bytes, dtype=np.uint8)
-    frame_array = frame_array.reshape((Y_FOV, X_FOV, 4))
-    bgr = frame_array[:, :, :3]
-    bgr_bytes = bgr.tobytes()
-    struct.pack_into('!HH', mysend_buffer, 0, X_FOV, Y_FOV)
-    data_size = len(bgr_bytes)
-    struct.pack_into('!I', mysend_buffer, 4, data_size)
-    mysend_buffer[8:8 + data_size] = bgr_bytes
-    mysock.sendto(mysend_buffer[:8 + data_size], mytarget)
-    
-    
-    
+    cropped = frame.crop(mystartx, mystarty, myendx, myendy)
+    img = np.array(cropped.frame_buffer, dtype=np.uint8)
+    img = cv2.cvtColor(img, cv2.COLOR_BGRA2BGR)
+
+    hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+    mask = cv2.inRange(hsv, np.array(lwcolor), np.array(uprclr))
+    dilated = cv2.dilate(mask, np.ones((3, 3), np.uint8), iterations=4)
+    thresh = cv2.threshold(dilated, 60, 255, cv2.THRESH_BINARY)[1]
+    contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+
+    if contours:
+        closest = min(
+            (c for c in contours if cv2.boundingRect(c)[1] <= 10),
+            key=lambda c: (
+                (cv2.boundingRect(c)[0] + cv2.boundingRect(c)[2] // 2 - screen_center[0])**2 +
+                (cv2.boundingRect(c)[1] + cv2.boundingRect(c)[3] // 2 - screen_center[1])**2
+            ),
+            default=None
+        )
+        if closest is not None:
+            top_most = min(closest, key=lambda p: p[0][1])
+            cX, cY = top_most[0][0], top_most[0][1]
+            packed = struct.pack("!HH", cX, cY)
+            encrypted = aes_cipher.encrypt(pad(packed, 16))
+            udp_socket.sendto(encrypted, (target_ip, target_port))
 
 @capture.event
 def on_closed():
-    print("Capture Session Closed")
-    cv2.destroyAllWindows()
     sock.close()
 
-print(f"Starting frame capture and streaming to {target_ip}:{target_port}")
-print(f"Frame size: {X_FOV}x{Y_FOV} pixels")
+print(f"Encrypted sender started — FOV: {X_FOV}x{Y_FOV} → Sending to {target_ip}:{target_port}")
 capture.start()
+
