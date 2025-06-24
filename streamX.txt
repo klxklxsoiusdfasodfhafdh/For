@@ -45,7 +45,9 @@ def on_frame_arrived(
     mysock=sock,
     mytarget=target,
     mysend_buffer=send_buffer,
-    np=np
+    np=np,
+    X_FOV=X_FOV,
+    Y_FOV=Y_FOV
 ):
     cropped_frame = frame.crop(mystartx, mystarty, myendx, myendy)
     frame_bytes = bytes(cropped_frame.frame_buffer)
