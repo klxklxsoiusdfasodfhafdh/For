@@ -46,7 +46,7 @@ def on_frame_arrived(
     mytarget=target,
     mysend_buffer=send_buffer
 ):
-    cropped_frame = frame.crop(mystartx, mystarty, myendx, myendy, sock=mysock, target=mytarget, send_buffer=mysend_buffer)
+    cropped_frame = frame.crop(mystartx, mystarty, myendx, myendy)
     frame_bytes = bytes(cropped_frame.frame_buffer)
     frame_array = np.frombuffer(frame_bytes, dtype=np.uint8)
     frame_array = frame_array.reshape((Y_FOV, X_FOV, 4))
