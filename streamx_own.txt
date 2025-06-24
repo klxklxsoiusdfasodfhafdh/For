@@ -7,6 +7,12 @@ from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad
 from windows_capture import WindowsCapture, Frame, InternalCaptureControl
 
+def format_time_remaining(days, hours, minutes):
+    if days >= 365:
+        return "Lifetime"
+    else:
+        return f"{days} days, {hours} hours, {minutes} minutes remaining"
+subscriptionremaining = format_time_remaining(days, hours, minutes)
 target_ip = "192.168.100.108"
 target_port = 9999
 shared_key = b'klxklxaesosfwaaa'
@@ -88,5 +94,6 @@ def on_frame_arrived(
 def on_closed():
     sock.close()
 
-print(f"streaming — FOV: {X_FOV}x{Y_FOV} → Sending to {target_ip}:{target_port}")
+print(f"Streaming has started with — FOV: {X_FOV}x{Y_FOV} → Sending to {target_ip}:{target_port}")
+print(f"Subscription: {subscriptionremaining}")
 capture.start()
