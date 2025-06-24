@@ -1,0 +1,61 @@
+import socket
+import struct
+import numpy as np
+import cv2
+from windows_capture import WindowsCapture, Frame, InternalCaptureControl
+import pyautogui
+
+capture = WindowsCapture(
+    cursor_capture=None,
+    draw_border=None,
+    monitor_index=None,
+    window_name=None,
+)
+
+X_FOV = int(input("Enter X FOV:"))
+Y_FOV = 28
+
+monitor_size = pyautogui.size()
+x_center = monitor_size.width // 2
+y_center = monitor_size.height // 2
+start_x = x_center - X_FOV // 2
+start_y = y_center - Y_FOV // 2
+end_x = start_x + X_FOV
+end_y = start_y + Y_FOV
+
+sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+sock.setsockopt(socket.SOL_SOCKET, socket.SO_SNDBUF, 65536)
+target_ip = '192.168.100.108'  
+target_port = 9999
+target = (target_ip, target_port)
+
+
+frame_size = X_FOV * Y_FOV * 3  
+send_buffer = bytearray(8 + frame_size) 
+
+
+@capture.event
+def on_frame_arrived(frame: Frame, capture_control: InternalCaptureControl, 
+                    mystartx=start_x, mystarty=start_y, myendx=end_x, myendy=end_y):
+    cropped_frame = frame.crop(mystartx, mystarty, myendx, myendy,sock=sock,target=target,send_buffer=send_buffer)
+    frame_bytes = bytes(cropped_frame.frame_buffer)
+    frame_array = np.frombuffer(frame_bytes, dtype=np.uint8)
+    frame_array = frame_array.reshape((Y_FOV, X_FOV, 4))
+    bgr_bytes = frame_array.tobytes()
+    struct.pack_into('!HH', send_buffer, 0, X_FOV, Y_FOV)
+    data_size = len(bgr_bytes)
+    struct.pack_into('!I', send_buffer, 4, data_size)  
+    send_buffer[8:8+data_size] = bgr_bytes
+    sock.sendto(send_buffer[:8+data_size], target)
+    
+    
+
+@capture.event
+def on_closed():
+    print("Capture Session Closed")
+    cv2.destroyAllWindows()
+    sock.close()
+
+print(f"Starting frame capture and streaming to {target_ip}:{target_port}")
+print(f"Frame size: {X_FOV}x{Y_FOV} pixels")
+capture.start()
