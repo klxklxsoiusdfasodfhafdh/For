@@ -6,7 +6,12 @@ import pyautogui
 from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad
 from windows_capture import WindowsCapture, Frame, InternalCaptureControl
-
+def format_time_remaining(days, hours, minutes):
+    if days >= 365:
+        return "Lifetime"
+    else:
+        return f"{days} days, {hours} hours, {minutes} minutes remaining"
+subscriptionremaining = format_time_remaining(days, hours, minutes)
 os.system('cls')
 target_ip = input("Enter ip of second PC:")
 print("")
@@ -96,6 +101,7 @@ def on_closed():
     sock.close()
 
 print("")
-print(f"Started streaming to FOV: {X_FOV} {target_ip}:{target_port}")
+print(f"Streaming has started to FOV: {X_FOV} {target_ip}:{target_port}")
+print(f"Subscription: {subscriptionremaining}")
 capture.start()
 
