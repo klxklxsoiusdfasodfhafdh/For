@@ -14,7 +14,6 @@ cipher = AES.new(shared_key, AES.MODE_ECB)
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
-# -- FOV Input --
 X_FOV = int(input("Enter X FOV: "))
 Y_FOV = 28  
 
@@ -30,7 +29,6 @@ end_y = start_y + Y_FOV
 lwcolor = [30, 125, 150]
 uprclr = [30, 255, 255]
 
-# -- Capture Init --
 capture = WindowsCapture(
     cursor_capture=None,
     draw_border=None,
@@ -88,6 +86,6 @@ def on_frame_arrived(
 def on_closed():
     sock.close()
 
-print(f"Encrypted sender started — FOV: {X_FOV}x{Y_FOV} → Sending to {target_ip}:{target_port}")
+print(f"Started streaming to FOV: {X_FOV} {target_ip}:{target_port}")
 capture.start()
 
