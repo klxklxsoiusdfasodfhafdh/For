@@ -17,7 +17,7 @@ sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 # -- FOV Input --
 X_FOV = int(input("Enter X FOV: "))
 Y_FOV = 28  
-deadbody = "1"
+deadbody = input("Enter 2 to ignore deadbody:")
 monitor_size = pyautogui.size()
 x_center = monitor_size.width // 2
 y_center = monitor_size.height // 2
