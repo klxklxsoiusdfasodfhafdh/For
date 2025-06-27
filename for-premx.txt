@@ -138,14 +138,6 @@ if os.path.exists(file_path_default_kleix):
     print("Success loading config manager...")
 
 
-resultxyxx1 = subprocess.run(['tasklist'], stdout=subprocess.PIPE, text=True)
-if 'vgc.exe' in resultxyxx1.stdout:
-    os.system('cls')
-    print("Error. Valorant anti-cheat is running.")
-    input()
-    sys.exit()
-subprocess.run(["sc", "start", "myklx"], shell=True)
-
 if server_nickname == "Crl":
     myklx(content4)
 else:
