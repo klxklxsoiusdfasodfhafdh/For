@@ -116,7 +116,7 @@ def on_frame_arrived(
             cX = x + w // 2
             cY = y + h // 2
             data = struct.pack("!3H", cX, cY, y)
-            encrypted = aes_cipher.encrypt(pad(packed, 16))
+            encrypted = aes_cipher.encrypt(pad(data, 16))
             udp_socket.sendto(encrypted, (target_ip, target_port))
 
 @capture.event
