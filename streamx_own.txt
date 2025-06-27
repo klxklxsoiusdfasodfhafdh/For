@@ -17,13 +17,7 @@ sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 # -- FOV Input --
 X_FOV = int(input("Enter X FOV: "))
 Y_FOV = 28  
-#mymode = input("Enter 1 for legacy, Enter 2 for snappy:")
-mymode = "2"
-def ifsnap(x):
-    if x == "2":
-        mybody = input("Enter 2 to ignore deadbody:")
-        return mybody
-deadbody = ifsnap(mymode)
+
 monitor_size = pyautogui.size()
 x_center = monitor_size.width // 2
 y_center = monitor_size.height // 2
@@ -62,62 +56,32 @@ def on_frame_arrived(
     aes_cipher=cipher,
     udp_socket=sock,
     target_ip=target_ip,
-    target_port=target_port,
-    deadbody=deadbody,
-    mymode=mymode
+    target_port=target_port
 ):
-    if mymode=="2":
-        cropped = frame.crop(mystartx, mystarty, myendx, myendy)
-        img = np.array(cropped.frame_buffer, dtype=np.uint8)
-        img = cv2.cvtColor(img, cv2.COLOR_BGRA2BGR)
-    
-        hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
-        mask = cv2.inRange(hsv, np.array(lwcolor), np.array(uprclr))
-        dilated = cv2.dilate(mask, np.ones((3, 3), np.uint8), iterations=4)
-        thresh = cv2.threshold(dilated, 60, 255, cv2.THRESH_BINARY)[1]
-        contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
-    
-        if contours:
-            closest = min(
-                (c for c in contours if not (cv2.boundingRect(c)[1] > 10 and deadbody == "2")),
-                key=lambda c: (
-                    (cv2.boundingRect(c)[0] + cv2.boundingRect(c)[2] // 2 - screen_center[0])**2 +
-                    (cv2.boundingRect(c)[1] + cv2.boundingRect(c)[3] // 2 - screen_center[1])**2
-                ),
-                default=None
-            )
-            if closest is not None:
-                top_most = min(closest, key=lambda p: p[0][1])
-                cX, cY = top_most[0][0], top_most[0][1]
-                packed = struct.pack("!HH", cX, cY)
-                encrypted = aes_cipher.encrypt(pad(packed, 16))
-                udp_socket.sendto(encrypted, (target_ip, target_port))
-    if mymode=="1":
-        cropped = frame.crop(mystartx, mystarty, myendx, myendy)
-        img = np.array(cropped.frame_buffer, dtype=np.uint8)
-        img = cv2.cvtColor(img, cv2.COLOR_BGRA2BGR)
-    
-        hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
-        mask = cv2.inRange(hsv, np.array(lwcolor), np.array(uprclr))
-        dilated = cv2.dilate(mask, np.ones((3, 3), np.uint8), iterations=4)
-        thresh = cv2.threshold(dilated, 60, 255, cv2.THRESH_BINARY)[1]
-        contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
-    
-        if contours:
-            min_distance = float('inf')
-            closest_contour = None
-            for contour in contours:
-                x, y, w, h = cv2.boundingRect(contour)
-                center = (x + w // 2, y + h // 2)
-                distance = ((center[0] - screen_center[0]) ** 2 + (center[1] - screen_center[1]) ** 2) ** 0.5     
-                if distance < min_distance:
-                    min_distance = distance
-                    closest_contour = contour
-            x, y, w, h = cv2.boundingRect(closest_contour)
-            cX = x + w // 2
-            cY = y + h // 2
-            data = struct.pack("!3H", cX, cY, y)
-            encrypted = aes_cipher.encrypt(pad(data, 16))
+    cropped = frame.crop(mystartx, mystarty, myendx, myendy)
+    img = np.array(cropped.frame_buffer, dtype=np.uint8)
+    img = cv2.cvtColor(img, cv2.COLOR_BGRA2BGR)
+
+    hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+    mask = cv2.inRange(hsv, np.array(lwcolor), np.array(uprclr))
+    dilated = cv2.dilate(mask, np.ones((3, 3), np.uint8), iterations=4)
+    thresh = cv2.threshold(dilated, 60, 255, cv2.THRESH_BINARY)[1]
+    contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+
+    if contours:
+        closest = min(
+            (c for c in contours if cv2.boundingRect(c)[1] <= 10),
+            key=lambda c: (
+                (cv2.boundingRect(c)[0] + cv2.boundingRect(c)[2] // 2 - screen_center[0])**2 +
+                (cv2.boundingRect(c)[1] + cv2.boundingRect(c)[3] // 2 - screen_center[1])**2
+            ),
+            default=None
+        )
+        if closest is not None:
+            top_most = min(closest, key=lambda p: p[0][1])
+            cX, cY = top_most[0][0], top_most[0][1]
+            packed = struct.pack("!HH", cX, cY)
+            encrypted = aes_cipher.encrypt(pad(packed, 16))
             udp_socket.sendto(encrypted, (target_ip, target_port))
 
 @capture.event
