@@ -87,7 +87,6 @@ def on_frame_arrived(
     contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
 
     if contours:
-        x
         closest = min(
             (c for c in contours if not (cv2.boundingRect(c)[1] > 10 and deadbody == "2")),
             key=lambda c: (
