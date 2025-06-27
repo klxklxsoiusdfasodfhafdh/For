@@ -115,7 +115,7 @@ def on_frame_arrived(
             x, y, w, h = cv2.boundingRect(closest_contour)
             cX = x + w // 2
             cY = y + h // 2
-            packed = struct.pack("!HH", cX, cY)
+            data = struct.pack("!3H", cX, cY, y)
             encrypted = aes_cipher.encrypt(pad(packed, 16))
             udp_socket.sendto(encrypted, (target_ip, target_port))
 
