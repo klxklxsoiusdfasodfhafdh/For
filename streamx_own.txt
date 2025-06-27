@@ -103,7 +103,6 @@ def on_frame_arrived(
         contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
     
         if contours:
-            x
             min_distance = float('inf')
             closest_contour = None
             for contour in contours:
