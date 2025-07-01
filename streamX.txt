@@ -13,7 +13,28 @@ def format_time_remaining(days, hours, minutes):
         return f"{days} days, {hours} hours, {minutes} minutes remaining"
 subscriptionremaining = format_time_remaining(days, hours, minutes)
 os.system('cls')
+
+def is_valid_ipv4(ip):
+    parts = ip.split(".")
+    if len(parts) != 4:
+        return False
+    for part in parts:
+        if not part.isdigit():
+            return False
+        num = int(part)
+        if num < 0 or num > 255:
+            return False
+        if part != str(num):  # prevents "01", "001", etc.
+            return False
+    return True
+
 target_ip = input("Enter ip of second PC:")
+if is_valid_ipv4(target_ip):
+    print("valid ip.")
+else:
+    print("Invalid IP.")
+    input()
+    exit()
 print("")
 target_port = 9999
 shared_key = b'klxklxaesosfwaaa'
