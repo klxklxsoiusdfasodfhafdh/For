@@ -27,9 +27,10 @@ end_x = start_x + X_FOV
 end_y = start_y + Y_FOV
 
 
-lwcolor = [30, 125, 150]
-uprclr = [30, 255, 255]
-
+#lwcolor = [30, 125, 150] yellow
+#uprclr = [30, 255, 255]
+lwcolor = [130, 50, 195]
+uprclr = [150, 255, 255]
 # -- Capture Init --
 capture = WindowsCapture(
     cursor_capture=None,
