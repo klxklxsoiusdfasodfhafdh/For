@@ -6,6 +6,21 @@ import pyautogui
 from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad
 from windows_capture import WindowsCapture, Frame, InternalCaptureControl
+
+def choose_monitor(get_monitors=get_monitors):
+    monitors = get_monitors()
+    if len(monitors) == 1:
+        return 1
+    else:
+        while True:
+            try:
+                choice = int(input("Multiple monitors detected. Enter 1 or 2: "))
+                if choice in [1, 2]:
+                    return choice
+            except ValueError:
+                pass
+            print("Invalid input. Please enter 1 or 2.")
+
 def format_time_remaining(days, hours, minutes):
     if days >= 365:
         return "Lifetime"
@@ -61,11 +76,11 @@ end_y = start_y + Y_FOV
 
 lwcolor = [30, 125, 150]
 uprclr = [30, 255, 255]
-
+monitorindex = choose_monitor()
 capture = WindowsCapture(
     cursor_capture=None,
     draw_border=None,
-    monitor_index=None,
+    monitor_index=monitorindex,
     window_name=None,
 )
 
