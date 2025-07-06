@@ -6,23 +6,7 @@ import pyautogui
 from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad
 from windows_capture import WindowsCapture, Frame, InternalCaptureControl
-from screeninfo import get_monitors
 
-def choose_monitor(get_monitors=get_monitors):
-    monitors = get_monitors()
-    if len(monitors) == 1:
-        return 1
-    else:
-        while True:
-            try:
-                choice = int(input("Multiple monitors detected. Enter 1 or 2: "))
-                if choice in [1, 2]:
-                    return choice
-            except ValueError:
-                pass
-            print("Invalid input. Please enter 1 or 2.")
-
-result = choose_monitor()
 target_ip = input("Enter IP second pc:")
 target_port = 9999
 shared_key = b'klxklxaesosfwaaa'
@@ -30,8 +14,15 @@ cipher = AES.new(shared_key, AES.MODE_ECB)
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
-# -- FOV Input --
 X_FOV = int(input("Enter X FOV: "))
+print("Choose color:")
+print("1. yl")
+print("2. purple")
+xcol = int(input("Enter 1-2: "))
+print("Choose Stream Mode")
+print("1. Whole Body")
+print("2. Half Body")
+deadbody = input("Enter choice:")
 Y_FOV = 28  
 
 monitor_size = pyautogui.size()
@@ -42,19 +33,28 @@ start_y = y_center - Y_FOV // 2
 end_x = start_x + X_FOV
 end_y = start_y + Y_FOV
 
+def myx_l(x):
+    if x == 1:
+        return [30, 125, 150]
+    elif x == 2:
+        return [130, 50, 195]
 
-#lwcolor = [30, 125, 150] yellow
-#uprclr = [30, 255, 255]
-lwcolor = [130, 50, 195]
-uprclr = [150, 255, 255]
+def myx_up(x):
+    if x == 1:
+        return [30, 255, 255]
+    elif x == 2:
+        return [150, 255, 255]
+
+lwcolor = myx_l(xcol)
+uprclr = myx_up(xcol)
 # -- Capture Init --
 capture = WindowsCapture(
     cursor_capture=None,
     draw_border=None,
-    monitor_index=result,
+    monitor_index=None,
     window_name=None,
 )
-
+os.system('cls')
 @capture.event
 def on_frame_arrived(
     frame: Frame,
@@ -73,6 +73,7 @@ def on_frame_arrived(
     aes_cipher=cipher,
     udp_socket=sock,
     target_ip=target_ip,
+    deadbody=deadbody,
     target_port=target_port
 ):
     cropped = frame.crop(mystartx, mystarty, myendx, myendy)
@@ -87,7 +88,7 @@ def on_frame_arrived(
 
     if contours:
         closest = min(
-            (c for c in contours if cv2.boundingRect(c)[1] <= 10),
+            (c for c in contours if not (cv2.boundingRect(c)[1] > 10 and deadbody == "2")),
             key=lambda c: (
                 (cv2.boundingRect(c)[0] + cv2.boundingRect(c)[2] // 2 - screen_center[0])**2 +
                 (cv2.boundingRect(c)[1] + cv2.boundingRect(c)[3] // 2 - screen_center[1])**2
@@ -104,6 +105,9 @@ def on_frame_arrived(
 @capture.event
 def on_closed():
     sock.close()
-
+if xcol == 1:
+    print("yellow")
+elif xcol == 2:
+    print("purple")
 print(f"Streaming has started with — FOV: {X_FOV}x{Y_FOV} → Sending to {target_ip}:{target_port}")
 capture.start()
