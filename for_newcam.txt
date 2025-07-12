@@ -117,7 +117,4 @@ os.system('cls')
 print("Almost there, please wait...")
 
 
-if server_nickname == 'Muret':
-    realpremx(content4)
-else:
-    premx_2025(content4)
+premx_2025(content4)
