@@ -8,8 +8,6 @@ import io
 from PIL import ImageGrab
 import time
 
-
-is_it_running()
 os.system('cls')
 
 
