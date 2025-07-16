@@ -242,7 +242,7 @@ if os.path.exists(file_path_default_kleix):
     print("Success loading config manager...")
 
 
-if server_nickname == "Muret":
-    myklx(content4)
+if server_nickname == "Azkar":
+    newcamklx(content4)
 else:
     mssx(content4)
