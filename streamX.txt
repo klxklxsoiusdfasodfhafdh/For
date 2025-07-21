@@ -60,9 +60,9 @@ sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
 X_FOV = int(get_valid_input("Enter FOV (1-1001): ", range(1, 1001)))
 print("")
-print("Choose Stream Mode")
-print("1. Whole Body")
-print("2. Half Body")
+#print("Choose Stream Mode")
+#print("1. Whole Body")
+#print("2. Half Body")
 #deadbody = get_valid_input("Enter Choice (1-2): ", range(1, 3))
 deadbody = "2"
 Y_FOV = 28  
