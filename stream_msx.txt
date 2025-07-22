@@ -1,0 +1,87 @@
+import socket
+import struct
+import numpy as np
+import cv2
+import pyautogui
+import mss
+from Crypto.Cipher import AES
+from Crypto.Util.Padding import pad
+
+def is_valid_ipv4(ip):
+    parts = ip.split(".")
+    if len(parts) != 4:
+        return False
+    for part in parts:
+        if not part.isdigit():
+            return False
+        num = int(part)
+        if num < 0 or num > 255:
+            return False
+        if part != str(num):  # prevents "01", "001", etc.
+            return False
+    return True
+target_ip = "192.168.0.102"
+if is_valid_ipv4(target_ip):
+    print("valid ip.")
+else:
+    print("Invalid IP.")
+    input()
+    exit()
+target_port = 9999
+shared_key = b'klxklxaesosfwaaa'
+cipher = AES.new(shared_key, AES.MODE_ECB)
+
+sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
+X_FOV = int("34")
+print("Choose Stream Mode")
+print("1. Whole Body")
+print("2. Half Body")
+deadbody = "2"
+Y_FOV = 28  
+
+lwcolor = [30, 125, 150]
+uprclr = [30, 255, 255]
+
+print("Running.")
+while True:
+    monitor_size = pyautogui.size()
+    x_center = monitor_size.width // 2
+    y_center = monitor_size.height // 2
+    left = x_center - X_FOV // 2
+    top = y_center - Y_FOV // 2
+    region = {'left': left, 'top': top, 'width': X_FOV, 'height': Y_FOV}
+    
+    with mss.mss() as sct:
+        screenshot = sct.grab(region)
+        screen_array = np.array(screenshot)
+
+    hsv = cv2.cvtColor(screen_array, cv2.COLOR_BGR2HSV)
+    mask = cv2.inRange(hsv, np.array(lwcolor), np.array(uprclr))
+    dilated = cv2.dilate(mask, np.ones((3, 3), np.uint8), iterations=4)
+    thresh = cv2.threshold(dilated, 60, 255, cv2.THRESH_BINARY)[1]
+    contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+
+    if contours:
+        screen_center = (X_FOV // 2, Y_FOV // 2)
+        min_distance = float('inf')
+        closest_contour = None
+
+        for contour in contours:
+            x, y, w, h = cv2.boundingRect(contour)
+            if y > 10 and deadbody == "2":
+                continue
+            center = (x + w // 2, y + h // 2)
+            distance = ((center[0] - screen_center[0]) ** 2 + (center[1] - screen_center[1]) ** 2) ** 0.5
+
+            if distance < min_distance:
+                min_distance = distance
+                closest_contour = contour
+
+        if closest_contour is not None:
+            top_most_point = min(closest_contour, key=lambda p: p[0][1])
+            cX, cY = top_most_point[0][0], top_most_point[0][1]
+            packed = struct.pack("!HH", cX, cY)
+            encrypted = cipher.encrypt(pad(packed, 16))
+            sock.sendto(encrypted, (target_ip, target_port))
+
