@@ -56,7 +56,7 @@ result = subprocess.run(["ping", "-n", "1", target_ip], capture_output=True, tex
 output = result.stdout.lower()
 
 if "destination host unreachable" in output or "request timed out" in output:
-    print(f"Error: No reply from {ip}")
+    print(f"Error: No reply from {target_ip}")
     print("IP cannot be reached, make sure both PC must be in the same network.")
     input()
     exit()
