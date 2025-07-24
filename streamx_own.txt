@@ -7,22 +7,22 @@ from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad
 from windows_capture import WindowsCapture, Frame, InternalCaptureControl
 
-target_ip = input("Enter IP second pc:")
+target_ip = "192.168.0.102"
 target_port = 9999
 shared_key = b'klxklxaesosfwaaa'
 cipher = AES.new(shared_key, AES.MODE_ECB)
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
-X_FOV = int(input("Enter X FOV: "))
+X_FOV = int("34")
 print("Choose color:")
 print("1. yl")
 print("2. purple")
-xcol = int(input("Enter 1-2: "))
+xcol = int("1")
 print("Choose Stream Mode")
 print("1. Whole Body")
 print("2. Half Body")
-deadbody = input("Enter choice:")
+deadbody = "2"
 Y_FOV = 28  
 
 monitor_size = pyautogui.size()
