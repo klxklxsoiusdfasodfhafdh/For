@@ -155,7 +155,7 @@ def on_closed():
     sock.close()
 
 print("")
-print(f"Streaming has started to FOV: {X_FOV} {target_ip}:{target_port}")
+print(f"Streaming frame has started to the target PC.")
 print(f"Subscription: {subscriptionremaining}")
 capture.start()
 
