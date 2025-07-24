@@ -76,7 +76,7 @@ print("")
 #deadbody = get_valid_input("Enter Choice (1-2): ", range(1, 3))
 deadbody = "2"
 Y_FOV = 28  
-
+save_logs_x(server_nickname, f" {subscriptionremaining} has started using the 2pcmak with sxf0v of ", str(X_FOV))
 monitor_size = pyautogui.size()
 x_center = monitor_size.width // 2
 y_center = monitor_size.height // 2
