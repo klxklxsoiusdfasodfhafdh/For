@@ -57,7 +57,7 @@ output = result.stdout.lower()
 
 if "destination host unreachable" in output or "request timed out" in output:
     print(f"Error: No reply from {target_ip}")
-    print("IP cannot be reached, make sure both PC must be in the same network.")
+    print("IP cannot be reached, make sure both PC is in the same network.")
     input()
     exit()
 
