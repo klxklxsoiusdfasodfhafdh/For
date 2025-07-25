@@ -63,7 +63,9 @@ if "destination host unreachable" in output or "request timed out" in output:
 
 print("")
 target_port = 9999
-shared_key = b'klxklxaesosfwaax'
+
+#shared_key = b'klxklxaesosfwaax'
+shared_key = b'klxklxaesosfwaaa'
 cipher = AES.new(shared_key, AES.MODE_ECB)
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
