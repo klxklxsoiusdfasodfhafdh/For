@@ -7,7 +7,7 @@ from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad
 from windows_capture import WindowsCapture, Frame, InternalCaptureControl
 
-target_ip = "192.168.0.102"
+target_ip = "192.168.0.103"
 target_port = 9999
 shared_key = b'klxklxaesosfwaaa'
 cipher = AES.new(shared_key, AES.MODE_ECB)
