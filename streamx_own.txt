@@ -3,27 +3,28 @@ import struct
 import numpy as np
 import cv2
 import pyautogui
-from Crypto.Cipher import AES
-from Crypto.Util.Padding import pad
+import os
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+from cryptography.hazmat.primitives.padding import PKCS7
 from windows_capture import WindowsCapture, Frame, InternalCaptureControl
 
 target_ip = input("Enter IP:")
 target_port = 9999
 shared_key = b'klxklxaesosfwaaa'
-cipher = AES.new(shared_key, AES.MODE_ECB)
-
+padder = PKCS7(128).padder()
+cipher = Cipher(algorithms.AES(shared_key), modes.ECB())
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
-X_FOV = int("34")
+X_FOV = 34
 print("Choose color:")
 print("1. yl")
 print("2. purple")
-xcol = int("1")
+xcol = 1
 print("Choose Stream Mode")
 print("1. Whole Body")
 print("2. Half Body")
 deadbody = "2"
-Y_FOV = 28  
+Y_FOV = 28
 
 monitor_size = pyautogui.size()
 x_center = monitor_size.width // 2
@@ -47,14 +48,16 @@ def myx_up(x):
 
 lwcolor = myx_l(xcol)
 uprclr = myx_up(xcol)
-# -- Capture Init --
+
 capture = WindowsCapture(
     cursor_capture=None,
     draw_border=None,
     monitor_index=None,
     window_name=None,
 )
+
 os.system('cls')
+
 @capture.event
 def on_frame_arrived(
     frame: Frame,
@@ -69,8 +72,11 @@ def on_frame_arrived(
     np=np,
     cv2=cv2,
     struct=struct,
-    pad=pad,
-    aes_cipher=cipher,
+    Cipher=Cipher,
+    algorithms=algorithms,
+    modes=modes,
+    padder_class=PKCS7,
+    shared_key=shared_key,
     udp_socket=sock,
     target_ip=target_ip,
     deadbody=deadbody,
@@ -99,15 +105,20 @@ def on_frame_arrived(
             top_most = min(closest, key=lambda p: p[0][1])
             cX, cY = top_most[0][0], top_most[0][1]
             packed = struct.pack("!HH", cX, cY)
-            encrypted = aes_cipher.encrypt(pad(packed, 16))
+            padder = padder_class(128).padder()
+            padded_data = padder.update(packed) + padder.finalize()
+            encryptor = Cipher(algorithms.AES(shared_key), modes.ECB()).encryptor()
+            encrypted = encryptor.update(padded_data) + encryptor.finalize()
             udp_socket.sendto(encrypted, (target_ip, target_port))
 
 @capture.event
 def on_closed():
     sock.close()
+
 if xcol == 1:
     print("yellow")
 elif xcol == 2:
     print("purple")
+
 print(f"Streaming has started with — FOV: {X_FOV}x{Y_FOV} → Sending to {target_ip}:{target_port}")
 capture.start()
