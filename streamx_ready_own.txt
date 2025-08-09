@@ -65,6 +65,7 @@ capture = WindowsCapture(
 @capture.event
 def on_frame_arrived(
     frame: Frame,
+    capture_control: InternalCaptureControl,
     mystartx=start_x,
     mystarty=start_y,
     myendx=end_x,
@@ -84,7 +85,7 @@ def on_frame_arrived(
     np=np,
     cv2=cv2
 ):
-    cropped = frame.crop(int(mystartx), int(mystarty), int(myendx), int(myendy))
+    cropped = frame.crop(mystartx, mystarty, myendx, myendy)
     img = np.array(cropped.frame_buffer, dtype=np.uint8)
     img = cv2.cvtColor(img, cv2.COLOR_BGRA2BGR)
 
