@@ -1,18 +1,17 @@
-import socket
-import struct
 import numpy as np
 import cv2
 import pyautogui
 import os
-from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
-from cryptography.hazmat.primitives.padding import PKCS7
+import time
+import socket
+import struct
+from Crypto.Cipher import AES
 from windows_capture import WindowsCapture, Frame, InternalCaptureControl
 
 target_ip = input("Enter IP:")
 target_port = 9999
 shared_key = b'klxklxaesosfwaaa'
-padder = PKCS7(128).padder()
-cipher = Cipher(algorithms.AES(shared_key), modes.ECB())
+
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
 X_FOV = 34
@@ -49,6 +48,15 @@ def myx_up(x):
 lwcolor = myx_l(xcol)
 uprclr = myx_up(xcol)
 
+aes_cipher = AES.new(shared_key, AES.MODE_ECB)
+_pad_buf = b"\0" * 16
+
+def fast_encrypt(data: bytes) -> bytes:
+    pad_len = (16 - (len(data) % 16)) % 16
+    if pad_len:
+        data += _pad_buf[:pad_len]
+    return aes_cipher.encrypt(data)
+
 capture = WindowsCapture(
     cursor_capture=None,
     draw_border=None,
@@ -72,11 +80,7 @@ def on_frame_arrived(
     np=np,
     cv2=cv2,
     struct=struct,
-    Cipher=Cipher,
-    algorithms=algorithms,
-    modes=modes,
-    padder_class=PKCS7,
-    shared_key=shared_key,
+    encrypt_func=fast_encrypt,
     udp_socket=sock,
     target_ip=target_ip,
     deadbody=deadbody,
@@ -105,10 +109,7 @@ def on_frame_arrived(
             top_most = min(closest, key=lambda p: p[0][1])
             cX, cY = top_most[0][0], top_most[0][1]
             packed = struct.pack("!HH", cX, cY)
-            padder = padder_class(128).padder()
-            padded_data = padder.update(packed) + padder.finalize()
-            encryptor = Cipher(algorithms.AES(shared_key), modes.ECB()).encryptor()
-            encrypted = encryptor.update(padded_data) + encryptor.finalize()
+            encrypted = encrypt_func(packed)
             udp_socket.sendto(encrypted, (target_ip, target_port))
 
 @capture.event
