@@ -43,8 +43,8 @@ def myx_l(x):
 def myx_up(x):
     return [30, 255, 255] if x == 1 else [150, 255, 255]
 
-lwcolor = myx_l(xcol)
-uprclr = myx_up(xcol)
+lwcolor = [30, 125, 150]
+uprclr = [30, 255, 255]
 
 aes_cipher = AES.new(shared_key, AES.MODE_ECB)
 _pad_buf = b"\0" * 16
