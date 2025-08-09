@@ -15,9 +15,9 @@ sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
 X_FOV = 34
 Y_FOV = 28
-FNLOFFST = input("Enter offset:")
-FNLXSPD = input("Enter xpd:")
-FNLYSPD = input("Enter ypd:")
+FNLOFFST = int(input("Enter offset:"))
+FNLXSPD = int(input("Enter xpd:"))
+FNLYSPD = int(input("Enter ypd:"))
 
 print("Choose color:")
 print("1. yl")
