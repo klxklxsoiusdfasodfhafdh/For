@@ -13,7 +13,7 @@ shared_key = b'klxklxaesosfwaaa'
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
-X_FOV = 34
+X_FOV = int(input("Enter fov:"))
 Y_FOV = 28
 FNLOFFST = int(input("Enter offset:"))
 FNLXSPD = int(input("Enter xpd:"))
