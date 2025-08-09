@@ -1,0 +1,121 @@
+import numpy as np
+import cv2
+import pyautogui
+import os
+import socket
+import struct
+from Crypto.Cipher import AES
+from windows_capture import WindowsCapture, Frame, InternalCaptureControl
+
+target_ip = input("Enter IP:")
+target_port = 9999
+shared_key = b'klxklxaesosfwaaa'
+
+sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
+X_FOV = 34
+Y_FOV = 28
+FNLOFFST = input("Enter offset:")
+FNLXSPD = input("Enter xpd:")
+FNLYSPD = input("Enter ypd:")
+
+print("Choose color:")
+print("1. yl")
+print("2. purple")
+xcol = 1
+
+print("Choose Stream Mode")
+print("1. Whole Body")
+print("2. Half Body")
+deadbody = "2"
+
+monitor_size = pyautogui.size()
+x_center = monitor_size.width // 2
+y_center = monitor_size.height // 2
+start_x = x_center - X_FOV // 2
+start_y = y_center - Y_FOV // 2
+end_x = start_x + X_FOV
+end_y = start_y + Y_FOV
+
+def myx_l(x):
+    return [30, 125, 150] if x == 1 else [130, 50, 195]
+
+def myx_up(x):
+    return [30, 255, 255] if x == 1 else [150, 255, 255]
+
+lwcolor = myx_l(xcol)
+uprclr = myx_up(xcol)
+
+aes_cipher = AES.new(shared_key, AES.MODE_ECB)
+_pad_buf = b"\0" * 16
+
+def fast_encrypt(data: bytes,_pad_buf=_pad_buf,aes_cipher=aes_cipher) -> bytes:
+    pad_len = (16 - (len(data) % 16)) % 16
+    if pad_len:
+        data += _pad_buf[:pad_len]
+    return aes_cipher.encrypt(data)
+
+capture = WindowsCapture(
+    cursor_capture=None,
+    draw_border=None,
+    monitor_index=None,
+    window_name=None,
+)
+
+@capture.event
+def on_frame_arrived(
+    frame: Frame,
+    mystartx=start_x,
+    mystarty=start_y,
+    myendx=end_x,
+    myendy=end_y,
+    screen_center=(X_FOV // 2, Y_FOV // 2),
+    lwcolor=lwcolor,
+    uprclr=uprclr
+):
+    cropped = frame.crop(mystartx, mystarty, myendx, myendy)
+    img = np.array(cropped.frame_buffer, dtype=np.uint8)
+    img = cv2.cvtColor(img, cv2.COLOR_BGRA2BGR)
+
+    hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+    mask = cv2.inRange(hsv, np.array(lwcolor), np.array(uprclr))
+    dilated = cv2.dilate(mask, np.ones((3, 3), np.uint8), iterations=4)
+    thresh = cv2.threshold(dilated, 60, 255, cv2.THRESH_BINARY)[1]
+    contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+
+    if contours:
+        closest = min(
+            (c for c in contours if not (cv2.boundingRect(c)[1] > 10 and deadbody == "2")),
+            key=lambda c: (
+                (cv2.boundingRect(c)[0] + cv2.boundingRect(c)[2] // 2 - screen_center[0])**2 +
+                (cv2.boundingRect(c)[1] + cv2.boundingRect(c)[3] // 2 - screen_center[1])**2
+            ),
+            default=None
+        )
+        if closest is not None:
+            top_most = min(closest, key=lambda p: p[0][1])
+            cX, cY = top_most[0][0], top_most[0][1]
+            cX += 6
+            lower_cY = cY + FNLOFFST
+
+            x_offset = cX - screen_center[0]
+            y_offset = lower_cY - screen_center[1]
+
+            final_x = x_offset * (FNLXSPD * 0.1)
+            final_y = y_offset * (FNLYSPD * 0.1)
+
+            packed = struct.pack("!ff", final_x, final_y)
+            encrypted = fast_encrypt(packed)
+            sock.sendto(encrypted, (target_ip, target_port))
+
+@capture.event
+def on_closed():
+    sock.close()
+
+if xcol == 1:
+    print("yellow")
+else:
+    print("purple")
+
+print(f"Streaming started: FOV {X_FOV}x{Y_FOV} → {target_ip}:{target_port}")
+capture.start()
