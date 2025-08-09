@@ -51,7 +51,7 @@ uprclr = myx_up(xcol)
 aes_cipher = AES.new(shared_key, AES.MODE_ECB)
 _pad_buf = b"\0" * 16
 
-def fast_encrypt(data: bytes,_pad_buf=_pad_buf) -> bytes:
+def fast_encrypt(data: bytes,_pad_buf=_pad_buf,aes_cipher=aes_cipher) -> bytes:
     pad_len = (16 - (len(data) % 16)) % 16
     if pad_len:
         data += _pad_buf[:pad_len]
