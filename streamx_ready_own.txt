@@ -71,7 +71,18 @@ def on_frame_arrived(
     myendy=end_y,
     screen_center=(X_FOV // 2, Y_FOV // 2),
     lwcolor=lwcolor,
-    uprclr=uprclr
+    uprclr=uprclr,
+    deadbody=deadbody,
+    FNLOFFST=fnloffst,
+    FNLXSPD=fnlxpsd,
+    FNLYSPD=fnlyspd,
+    struct=struct,
+    fast_encrypt=fast_encrypt,
+    sock=sock,
+    target_ip=target_ip,
+    target_port=target_port,
+    np=np,
+    cv2=cv2
 ):
     cropped = frame.crop(mystartx, mystarty, myendx, myendy)
     img = np.array(cropped.frame_buffer, dtype=np.uint8)
@@ -107,6 +118,7 @@ def on_frame_arrived(
             packed = struct.pack("!ff", final_x, final_y)
             encrypted = fast_encrypt(packed)
             sock.sendto(encrypted, (target_ip, target_port))
+
 
 @capture.event
 def on_closed():
