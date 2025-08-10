@@ -95,6 +95,16 @@ end_y = start_y + Y_FOV
 
 lwcolor = [30, 125, 150]
 uprclr = [30, 255, 255]
+
+aes_cipher = AES.new(shared_key, AES.MODE_ECB)
+_pad_buf = b"\0" * 16
+def fast_encrypt(data: bytes,_pad_buf=_pad_buf,aes_cipher=aes_cipher) -> bytes:
+    pad_len = (16 - (len(data) % 16)) % 16
+    if pad_len:
+        data += _pad_buf[:pad_len]
+    return aes_cipher.encrypt(data)
+
+
 monitorindex = choose_monitor()
 capture = WindowsCapture(
     cursor_capture=None,
@@ -117,8 +127,7 @@ def on_frame_arrived(
     np=np,
     cv2=cv2,
     struct=struct,
-    pad=pad,
-    aes_cipher=cipher,
+    encrypt_func=fast_encrypt,
     udp_socket=sock,
     target_ip=target_ip,
     target_port=target_port,
@@ -154,7 +163,7 @@ def on_frame_arrived(
             top_most = min(closest, key=lambda p: p[0][1])
             cX, cY = top_most[0][0], top_most[0][1]
             packed = struct.pack("!HH", cX, cY)
-            encrypted = aes_cipher.encrypt(pad(packed, 16))
+            encrypted = encrypt_func(packed)
             udp_socket.sendto(encrypted, (target_ip, target_port))
 
 @capture.event
