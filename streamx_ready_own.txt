@@ -6,7 +6,11 @@ import socket
 import struct
 from Crypto.Cipher import AES
 from windows_capture import WindowsCapture, Frame, InternalCaptureControl
-
+resulxt = subprocess.run('tasklist', capture_output=True, text=True)
+if 'python.exe' in resulxt.stdout.lower():
+    print('Warning: only 1 instance can be run.')
+    input()
+    exit()
 target_ip = input("Enter IP:")
 target_port = 9999
 shared_key = b'klxklxaesosfwaaa'
